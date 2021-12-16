@@ -9,17 +9,78 @@ import {
 	KeyboardAvoidingView,
 	SafeAreaView
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { AntDesign } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
 import services from "../../../db/services";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Stopwatch, Timer } from "react-native-stopwatch-timer";
 
-export default function renderRoutine({ onChangeState, changeView }) {
+export default function renderRoutine({ routineId }) {
+	const [exercises, setExercises] = useState();
+	const [routineData, setRoutineData] = useState();
+	const [data, setData] = useState([]);
+
+	const [isStopwatchStart, setIsStopwatchStart] = useState(false);
+	const [resetStopwatch, setResetStopwatch] = useState(false);
+
 	useEffect(() => {
 		console.log("<===> Hello World <===>");
+		async function getRoutineData() {
+			if (routineId) {
+				let data = await services.getRoutine(routineId);
+				if (await data) {
+					setExercises((prev) => data.routineExercises);
+
+					setRoutineData({
+						routineName: data.routineName,
+						routineNotes: data.routineNotes,
+						uid: data.uid
+					});
+				}
+			}
+		}
+		getRoutineData();
 	}, []);
+	const addSet = (text) => {
+		let state = false;
+		let newArray = data.length > 0 ? data : [];
+		if (newArray.length > 0) {
+			newArray.map((el) => {
+				if (
+					el.exerciseName === text.exerciseName &&
+					el.set === text.set
+				) {
+					if (text.weight) {
+						console.log("WEIGHT");
+						el.weight = text.weight;
+						state = true;
+					} else if (text.reps) {
+						console.log("REPS");
+						el.reps = text.reps;
+						state = true;
+					} else if (text.notes) {
+						console.log("Notes");
+						el.notes = text.notes;
+						state = true;
+					} else {
+						console.log("OTHER");
+						console.log(text);
+					}
+				}
+			});
+		}
+		if (!state || newArray.length <= 0) {
+			newArray.push(text);
+			console.log(newArray);
+			setData((prev) => newArray);
+		} else {
+			setData((prev) => newArray);
+		}
+	};
+	const endWorkout = (e) => {
+		console.log("=====================");
+		console.log(data);
+		console.log("=====================");
+	};
 
 	return (
 		<>
@@ -31,31 +92,22 @@ export default function renderRoutine({ onChangeState, changeView }) {
 							style={styles.input}
 							placeholder="Routine Name"
 							onChangeText={(text) => setName(text)}
-							defaultValue="Workout B"
+							defaultValue={
+								routineData ? routineData.routineName : null
+							}
 						/>
 						<TextInput
 							style={styles.input}
 							placeholder="Notes"
 							onChangeText={(text) => setNotes(text)}
-							defaultValue="easy"
+							defaultValue={
+								routineData ? routineData.routineNotes : null
+							}
 						/>
 					</SafeAreaView>
 				</KeyboardAvoidingView>
 				<FlatList
-					data={[
-						{
-							name: "Workout A",
-							sets: 2
-						},
-						{
-							name: "Push",
-							sets: 3
-						},
-						{
-							name: "Pull",
-							sets: 4
-						}
-					]}
+					data={exercises ? exercises : null}
 					keyExtractor={(item) => item.id}
 					renderItem={({ item }) => (
 						<>
@@ -68,9 +120,9 @@ export default function renderRoutine({ onChangeState, changeView }) {
 										left: 15.5,
 										alignSelf: "flex-start"
 									}}>
-									{item.name}
+									{item.exerciseName}
 								</Text>
-								{[...Array(item.sets)].map((e, i) => {
+								{[...Array(Number(item.sets))].map((e, i) => {
 									return (
 										<View style={styles.setRow}>
 											<View
@@ -80,13 +132,29 @@ export default function renderRoutine({ onChangeState, changeView }) {
 												}}>
 												<TextInput
 													style={styles.setInput}
-													placeholder="kg: 12"
+													placeholder="weight: 12"
+													onChangeText={(text) =>
+														addSet({
+															exerciseName:
+																item.exerciseName,
+															weight: text,
+															set: i
+														})
+													}
 												/>
 											</View>
 											<View style={styles.setCol}>
 												<TextInput
 													style={styles.setInput}
 													placeholder="reps: 10"
+													onChangeText={(text) =>
+														addSet({
+															exerciseName:
+																item.exerciseName,
+															reps: text,
+															set: i
+														})
+													}
 												/>
 											</View>
 											<View
@@ -97,6 +165,14 @@ export default function renderRoutine({ onChangeState, changeView }) {
 												<TextInput
 													style={styles.setInput}
 													placeholder="notes: easy"
+													onChangeText={(text) =>
+														addSet({
+															exerciseName:
+																item.exerciseName,
+															notes: text,
+															set: i
+														})
+													}
 												/>
 											</View>
 										</View>
@@ -107,18 +183,45 @@ export default function renderRoutine({ onChangeState, changeView }) {
 					)}
 				/>
 				<TouchableOpacity
-					onPress={() => changeViewState()}
+					onPress={(e) => {
+						setIsStopwatchStart(!isStopwatchStart);
+						setResetStopwatch(false);
+						if (isStopwatchStart) {
+							endWorkout(e);
+						}
+					}}
 					style={styles.authButton}>
-					<Text style={styles.buttonText}>Start Workout</Text>
+					{isStopwatchStart ? (
+						<Text style={styles.buttonText}>End Workout</Text>
+					) : (
+						<Text style={styles.buttonText}>Start Workout</Text>
+					)}
 				</TouchableOpacity>
-				<TouchableOpacity style={styles.doneButton}>
-					<Text style={styles.buttonText}>02:23</Text>
-				</TouchableOpacity>
+				<View style={styles.doneButton}>
+					<Text style={styles.buttonText}>
+						{isStopwatchStart ? (
+							<Stopwatch
+								start={isStopwatchStart}
+								// To start
+								reset={resetStopwatch}
+								// To reset
+								options={options}
+								// Options for the styling
+							/>
+						) : (
+							<MaterialCommunityIcons
+								name="timer-outline"
+								size={30}
+								color="white"
+							/>
+						)}
+					</Text>
+				</View>
 			</View>
 			<LinearGradient
-				colors={["#ffff", "#d5990c", "#ffff"]}
-				start={[0.25, 0.25]}
-				end={[0.8, 0.8]}
+				colors={["#d5990c", "#ffff", "#ffff"]}
+				start={[0, 0]}
+				end={[1, 1]}
 				style={{
 					marginBottom: 41,
 					marginTop: -41,
@@ -134,6 +237,19 @@ export default function renderRoutine({ onChangeState, changeView }) {
 		</>
 	);
 }
+const options = {
+	container: {
+		backgroundColor: "transparent",
+		width: 100,
+		alignItems: "center"
+	},
+	text: {
+		fontSize: 15,
+		color: "#FFF",
+		marginLeft: -25,
+		marginRight: 10
+	}
+};
 
 const styles = StyleSheet.create({
 	body: {

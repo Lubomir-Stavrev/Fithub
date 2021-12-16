@@ -11,7 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign } from "@expo/vector-icons";
 import services from "../../db/services";
 
-export default function routines() {
+export default function routines({ changeView }) {
 	const [routines, setRoutines] = useState();
 
 	useEffect(() => {
@@ -24,6 +24,10 @@ export default function routines() {
 		func();
 	}, []);
 
+	const onRoutineCick = (routineId) => {
+		changeView("RenderRoutines", routineId);
+	};
+
 	return (
 		<>
 			<View style={styles.body}>
@@ -31,7 +35,8 @@ export default function routines() {
 					data={routines ? routines : null}
 					keyExtractor={(item) => item.routineId}
 					renderItem={({ item }) => (
-						<TouchableOpacity>
+						<TouchableOpacity
+							onPress={() => onRoutineCick(item.routineId)}>
 							<View style={styles.item}>
 								<Text
 									style={{

@@ -29,20 +29,31 @@ export default function Home({ navigation }) {
 	const [routines, setRoutines] = useState(true);
 	const [history, setHistory] = useState(false);
 	const [addRoutine, setAddRoutine] = useState(false);
+	const [renderRoutine, setRenderRoutine] = useState(false);
 
-	const changeView = (viewState) => {
+	const [renderRoutineId, setRoutineId] = useState();
+	const changeView = (viewState, param) => {
 		if (viewState === "history") {
 			setRoutines((prev) => false);
 			setHistory((prev) => true);
 			setAddRoutine((prev) => false);
+			setRenderRoutine((prev) => false);
 		} else if (viewState === "addRoutine") {
 			setRoutines((prev) => false);
 			setHistory((prev) => false);
 			setAddRoutine((prev) => true);
+			setRenderRoutine((prev) => false);
+		} else if (viewState === "RenderRoutines") {
+			setRoutines((prev) => false);
+			setHistory((prev) => false);
+			setAddRoutine((prev) => false);
+			setRenderRoutine((prev) => true);
+			setRoutineId((prev) => param);
 		} else {
 			setRoutines((prev) => true);
 			setHistory((prev) => false);
 			setAddRoutine((prev) => false);
+			setRenderRoutine((prev) => false);
 		}
 	};
 
@@ -73,9 +84,16 @@ export default function Home({ navigation }) {
 				resizeMode="cover"
 				source={image}
 				style={styles.image}>
-				{routines ? <RenderRoutine></RenderRoutine> : null}
+				{routines ? (
+					<Routines changeView={changeView}></Routines>
+				) : null}
 				{history ? <RoutineHistory /> : null}
 				{addRoutine ? <AddRoutine changeView={changeView} /> : null}
+				{renderRoutine ? (
+					<RenderRoutine
+						routineId={renderRoutineId ? renderRoutineId : null}
+					/>
+				) : null}
 
 				<View style={styles.footer}>
 					<View>

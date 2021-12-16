@@ -127,7 +127,7 @@ export default {
 	},
 
 	getRoutine(id) {
-		return fetch(db + id + "/.json")
+		return fetch(`${db}routines/${id}/.json`)
 			.then((res) => res.json())
 			.then((data) => {
 				return data;
