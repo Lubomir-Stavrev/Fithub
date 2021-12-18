@@ -7,78 +7,84 @@ import {
 	FlatList,
 	TextInput,
 	KeyboardAvoidingView,
-	SafeAreaView
+	SafeAreaView,
+	ScrollView
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import services from "../../../db/services";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Stopwatch, Timer } from "react-native-stopwatch-timer";
+import { Stopwatch } from "react-native-stopwatch-timer";
 
-export default function renderRoutine({ routineId }) {
+export default function renderRoutine({ routineId, changeView }) {
 	const [exercises, setExercises] = useState();
 	const [routineData, setRoutineData] = useState();
-	const [data, setData] = useState([]);
-
+	const [data, setData] = useState({});
+	const [notes, setNotes] = useState();
+	const [lastExercises, setLastExercises] = useState();
 	const [isStopwatchStart, setIsStopwatchStart] = useState(false);
 	const [resetStopwatch, setResetStopwatch] = useState(false);
 
-	useEffect(() => {
+	useEffect(async () => {
 		console.log("<===> Hello World <===>");
 		async function getRoutineData() {
 			if (routineId) {
 				let data = await services.getRoutine(routineId);
+				let lastWorkout = await services.getLastWorkout(routineId);
+
 				if (await data) {
-					setExercises((prev) => data.routineExercises);
+					setExercises((prev) => data?.routineExercises);
 
 					setRoutineData({
-						routineName: data.routineName,
-						routineNotes: data.routineNotes,
+						routineName: data.routineName ? data.routineName : "",
+						routineNotes: lastWorkout?.note
+							? lastWorkout.note
+							: data?.routineNotes,
 						uid: data.uid
 					});
+
+					if (await lastWorkout?.allExercises) {
+						setLastExercises((prev) => lastWorkout.allExercises);
+					}
 				}
 			}
 		}
-		getRoutineData();
+		try {
+			await getRoutineData();
+		} catch (e) {
+			console.log(e);
+		}
 	}, []);
 	const addSet = (text) => {
-		let state = false;
-		let newArray = data.length > 0 ? data : [];
-		if (newArray.length > 0) {
-			newArray.map((el) => {
-				if (
-					el.exerciseName === text.exerciseName &&
-					el.set === text.set
-				) {
-					if (text.weight) {
-						console.log("WEIGHT");
-						el.weight = text.weight;
-						state = true;
-					} else if (text.reps) {
-						console.log("REPS");
-						el.reps = text.reps;
-						state = true;
-					} else if (text.notes) {
-						console.log("Notes");
-						el.notes = text.notes;
-						state = true;
-					} else {
-						console.log("OTHER");
-						console.log(text);
-					}
-				}
-			});
-		}
-		if (!state || newArray.length <= 0) {
-			newArray.push(text);
-			console.log(newArray);
-			setData((prev) => newArray);
+		let arr = data;
+		if (arr[text.exerciseName]) {
+			if (arr[text.exerciseName][text.set]) {
+				arr[text.exerciseName][text.set][text.type] = text.value;
+			} else {
+				arr[text.exerciseName][text.set] = { [text.type]: text.value };
+			}
 		} else {
-			setData((prev) => newArray);
+			arr[text.exerciseName] = {
+				[text.set]: { [text.type]: text.value }
+			};
 		}
+		setData((prev) => arr);
 	};
 	const endWorkout = (e) => {
 		console.log("=====================");
-		console.log(data);
+		try {
+			services.saveExercises(data, notes, routineId).then((res) => {
+				console.log(res);
+
+				services
+					.setLastExercise(data, notes, routineId)
+					.then((resp) => {
+						console.log(resp);
+						changeView("Routines");
+					});
+			});
+		} catch (e) {
+			console.log(e);
+		}
 		console.log("=====================");
 	};
 
@@ -106,11 +112,16 @@ export default function renderRoutine({ routineId }) {
 						/>
 					</SafeAreaView>
 				</KeyboardAvoidingView>
+
 				<FlatList
-					data={exercises ? exercises : null}
+					data={
+						exercises && (lastExercises || lastExercises == null)
+							? exercises
+							: null
+					}
 					keyExtractor={(item) => item.id}
 					renderItem={({ item }) => (
-						<>
+						<ScrollView>
 							<View style={styles.exerciseRow}>
 								<Text
 									style={{
@@ -123,6 +134,50 @@ export default function renderRoutine({ routineId }) {
 									{item.exerciseName}
 								</Text>
 								{[...Array(Number(item.sets))].map((e, i) => {
+									let weight = "0";
+									let reps = "0";
+									let notes = "";
+									try {
+										if (lastExercises) {
+											if (
+												lastExercises[item.exerciseName]
+											) {
+												if (
+													lastExercises[
+														item.exerciseName
+													][i]
+												) {
+													weight = lastExercises[
+														item.exerciseName
+													][i].weight
+														? lastExercises[
+																item
+																	.exerciseName
+														  ][i].weight
+														: "0";
+													reps = lastExercises[
+														item.exerciseName
+													][i].reps
+														? lastExercises[
+																item
+																	.exerciseName
+														  ][i].reps
+														: "";
+													notes = lastExercises[
+														item.exerciseName
+													][i].notes
+														? lastExercises[
+																item
+																	.exerciseName
+														  ][i].notes
+														: "";
+												}
+											}
+										}
+									} catch (e) {
+										console.log(e);
+									}
+
 									return (
 										<View style={styles.setRow}>
 											<View
@@ -132,12 +187,13 @@ export default function renderRoutine({ routineId }) {
 												}}>
 												<TextInput
 													style={styles.setInput}
-													placeholder="weight: 12"
+													placeholder={`weight: ${weight}`}
 													onChangeText={(text) =>
 														addSet({
 															exerciseName:
 																item.exerciseName,
-															weight: text,
+															value: text,
+															type: "weight",
 															set: i
 														})
 													}
@@ -146,12 +202,13 @@ export default function renderRoutine({ routineId }) {
 											<View style={styles.setCol}>
 												<TextInput
 													style={styles.setInput}
-													placeholder="reps: 10"
+													placeholder={`reps: ${reps}`}
 													onChangeText={(text) =>
 														addSet({
 															exerciseName:
 																item.exerciseName,
-															reps: text,
+															value: text,
+															type: "reps",
 															set: i
 														})
 													}
@@ -164,12 +221,13 @@ export default function renderRoutine({ routineId }) {
 												}}>
 												<TextInput
 													style={styles.setInput}
-													placeholder="notes: easy"
+													placeholder={`notes: ${notes}`}
 													onChangeText={(text) =>
 														addSet({
 															exerciseName:
 																item.exerciseName,
-															notes: text,
+															value: text,
+															type: "notes",
 															set: i
 														})
 													}
@@ -179,9 +237,10 @@ export default function renderRoutine({ routineId }) {
 									);
 								})}
 							</View>
-						</>
+						</ScrollView>
 					)}
 				/>
+
 				<TouchableOpacity
 					onPress={(e) => {
 						setIsStopwatchStart(!isStopwatchStart);

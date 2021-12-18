@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-	StyleSheet,
-	Text,
-	View,
-	TouchableOpacity,
-	FlatList
-} from "react-native";
+import { StyleSheet, Text, View, FlatList } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 export default function routineHistory() {

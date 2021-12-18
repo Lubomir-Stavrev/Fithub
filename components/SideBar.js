@@ -3,8 +3,6 @@ import {
 	View,
 	Text,
 	StyleSheet,
-	ScrollView,
-	ImageBackground,
 	Image,
 	Dimensions,
 	TouchableOpacity

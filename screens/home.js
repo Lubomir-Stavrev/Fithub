@@ -91,6 +91,7 @@ export default function Home({ navigation }) {
 				{addRoutine ? <AddRoutine changeView={changeView} /> : null}
 				{renderRoutine ? (
 					<RenderRoutine
+						changeView={changeView}
 						routineId={renderRoutineId ? renderRoutineId : null}
 					/>
 				) : null}
@@ -102,7 +103,11 @@ export default function Home({ navigation }) {
 								name="dumbbell"
 								style={{ marginTop: 10, marginRight: 21 }}
 								size={35}
-								color={routines ? "#d5990c" : "#ccc"}
+								color={
+									routines || renderRoutine
+										? "#d5990c"
+										: "#ccc"
+								}
 							/>
 						</TouchableOpacity>
 					</View>

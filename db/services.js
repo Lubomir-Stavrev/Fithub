@@ -139,11 +139,9 @@ export default {
 
 	setLastExercise(allExercises, note, id) {
 		let exercises = { allExercises, note };
-		return fetch(db + id + "/lastWorkout/.json", {
+		return fetch(db + `routines/${id}/lastWorkout/.json`, {
 			method: "PATCH",
-			body: JSON.stringify({
-				exercises
-			})
+			body: JSON.stringify({ allExercises, note })
 		})
 			.then((res) => res.json())
 			.then((data) => {
@@ -154,7 +152,7 @@ export default {
 			});
 	},
 	saveExercises(exercises, note, id) {
-		return fetch(db + id + "/allWorkouts/.json", {
+		return fetch(db + `routines/${id}/allWorkouts/.json`, {
 			method: "POST",
 			body: JSON.stringify({
 				exercises,
@@ -181,7 +179,7 @@ export default {
 			});
 	},
 	getLastWorkout(rID) {
-		return fetch(db + `${rID}/lastWorkout/exercises/.json`)
+		return fetch(db + `routines/${rID}/lastWorkout/.json`)
 			.then((res) => res.json())
 			.then((data) => {
 				return data;
