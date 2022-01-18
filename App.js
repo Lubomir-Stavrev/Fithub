@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import * as Font from "expo-font";
 import {
 	StyleSheet,
-	Text,
 	View,
 	TouchableWithoutFeedback,
 	Keyboard
@@ -11,6 +10,7 @@ import {
 import Navigator from "./Routes/drawer";
 import firebase from "./firebase";
 import AppLoading from "expo-app-loading";
+import { LogBox } from "react-native";
 
 const getFonts = () =>
 	Font.loadAsync({
@@ -21,6 +21,12 @@ const getFonts = () =>
 export default function App() {
 	const [fontsLoaded, setFontsLoaded] = useState(false);
 
+	const hideWarning = () => {
+		LogBox.ignoreLogs([""]);
+		LogBox.ignoreLogs([
+			`Warning: Async Storage has been extracted from react-native core and will be removed in a future release.`
+		]);
+	};
 	if (fontsLoaded) {
 		return (
 			<TouchableWithoutFeedback
@@ -29,6 +35,7 @@ export default function App() {
 				}}>
 				<View style={styles.container}>
 					<Navigator />
+					{hideWarning()}
 				</View>
 			</TouchableWithoutFeedback>
 		);

@@ -73,9 +73,6 @@ export default function routines(props) {
 
 const styles = StyleSheet.create({
 	body: {
-		borderBottomWidth: 1.5,
-		borderColor: "#ccc",
-		borderRadius: 20,
 		width: "91%",
 		height: 250,
 		backgroundColor: "rgba(18, 18, 19,0.6)",

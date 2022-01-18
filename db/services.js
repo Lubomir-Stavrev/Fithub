@@ -117,7 +117,7 @@ export default {
 	},
 
 	deleteWorkout(rId, wId) {
-		return fetch(db + `${rId}/allWorkouts/${wId}/.json`, {
+		return fetch(db + `routines/${rId}/allWorkouts/${wId}/.json`, {
 			method: "DELETE"
 		})
 			.then((res) => res.json())
@@ -151,12 +151,15 @@ export default {
 				throw new Error(err);
 			});
 	},
-	saveExercises(exercises, note, id) {
+	saveExercises(exercises, note, id, time, date, fullDate) {
 		return fetch(db + `routines/${id}/allWorkouts/.json`, {
 			method: "POST",
 			body: JSON.stringify({
 				exercises,
-				note
+				note,
+				time,
+				date,
+				fullDate
 			})
 		})
 			.then((res) => res.json())
@@ -169,7 +172,7 @@ export default {
 	},
 
 	getWorkout(rID, wId) {
-		return fetch(db + `${rID}/allWorkouts/` + wId + "/.json")
+		return fetch(db + `routines/${rID}/allWorkouts/` + wId + "/.json")
 			.then((res) => res.json())
 			.then((data) => {
 				return data;

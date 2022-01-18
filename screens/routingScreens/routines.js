@@ -80,7 +80,7 @@ export default function routines({ changeView }) {
 			<LinearGradient
 				colors={["#d5990c", "#ffff", "#ffff"]}
 				start={[0, 0]}
-				end={[1, 1]}
+				end={[0.65, 0.91]}
 				location={[0.25, 0.4, 1]}
 				style={{
 					marginBottom: 41,
@@ -90,7 +90,7 @@ export default function routines({ changeView }) {
 				<View
 					style={{
 						height: 1.5,
-						width: 300,
+						width: 330,
 						borderRadius: 1000
 					}}></View>
 			</LinearGradient>
@@ -100,9 +100,6 @@ export default function routines({ changeView }) {
 
 const styles = StyleSheet.create({
 	body: {
-		borderBottomWidth: 1.5,
-		borderColor: "#ccc",
-		borderRadius: 20,
 		width: "91%",
 		height: "83%",
 		backgroundColor: "rgba(18, 18, 19,0.6)",

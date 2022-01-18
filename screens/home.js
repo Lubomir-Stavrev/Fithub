@@ -24,36 +24,51 @@ import Routines from "./routingScreens/routines";
 import RoutineHistory from "./routingScreens/routineHistory";
 import AddRoutine from "./routingScreens/addRoutine/AddRouter";
 import RenderRoutine from "./routingScreens/doRoutine/RenderRoutine";
+import ViewWorkout from "./routingScreens/ViewWorkout";
 
 export default function Home({ navigation }) {
 	const [routines, setRoutines] = useState(true);
 	const [history, setHistory] = useState(false);
 	const [addRoutine, setAddRoutine] = useState(false);
 	const [renderRoutine, setRenderRoutine] = useState(false);
+	const [viewWorkout, setViewWorkout] = useState(false);
 
 	const [renderRoutineId, setRoutineId] = useState();
+	const [renderWorkoutId, setWorkoutId] = useState();
 	const changeView = (viewState, param) => {
 		if (viewState === "history") {
 			setRoutines((prev) => false);
 			setHistory((prev) => true);
 			setAddRoutine((prev) => false);
 			setRenderRoutine((prev) => false);
+			setViewWorkout((prev) => false);
 		} else if (viewState === "addRoutine") {
 			setRoutines((prev) => false);
 			setHistory((prev) => false);
 			setAddRoutine((prev) => true);
 			setRenderRoutine((prev) => false);
+			setViewWorkout((prev) => false);
 		} else if (viewState === "RenderRoutines") {
 			setRoutines((prev) => false);
 			setHistory((prev) => false);
 			setAddRoutine((prev) => false);
+			setViewWorkout((prev) => false);
 			setRenderRoutine((prev) => true);
 			setRoutineId((prev) => param);
+		} else if (viewState === "ViewWorkout") {
+			setRoutines((prev) => false);
+			setHistory((prev) => false);
+			setAddRoutine((prev) => false);
+			setRenderRoutine((prev) => false);
+			setViewWorkout((prev) => true);
+			setRoutineId((prev) => param.routineId);
+			setWorkoutId((prev) => param.workoutId);
 		} else {
 			setRoutines((prev) => true);
 			setHistory((prev) => false);
 			setAddRoutine((prev) => false);
 			setRenderRoutine((prev) => false);
+			setViewWorkout((prev) => false);
 		}
 	};
 
@@ -87,13 +102,27 @@ export default function Home({ navigation }) {
 				{routines ? (
 					<Routines changeView={changeView}></Routines>
 				) : null}
-				{history ? <RoutineHistory /> : null}
+				{history ? (
+					<RoutineHistory
+						changeView={changeView}
+						navigation={navigation}
+					/>
+				) : null}
 				{addRoutine ? <AddRoutine changeView={changeView} /> : null}
 				{renderRoutine ? (
 					<RenderRoutine
 						changeView={changeView}
 						routineId={renderRoutineId ? renderRoutineId : null}
+						navigation={navigation}
 					/>
+				) : null}
+				{viewWorkout ? (
+					<ViewWorkout
+						ids={
+							renderRoutineId && renderWorkoutId
+								? { rId: renderRoutineId, wId: renderWorkoutId }
+								: null
+						}></ViewWorkout>
 				) : null}
 
 				<View style={styles.footer}>
@@ -132,7 +161,9 @@ export default function Home({ navigation }) {
 									marginRight: 5
 								}}
 								size={34}
-								color={history ? "#d5990c" : "#ccc"}
+								color={
+									history || viewWorkout ? "#d5990c" : "#ccc"
+								}
 							/>
 						</TouchableOpacity>
 					</View>

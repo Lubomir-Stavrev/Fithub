@@ -11,10 +11,9 @@ import {
 import { DrawerNavigatorItems } from "react-navigation-drawer";
 import DefaultImage from "../assets/welcomePage.jpg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import services from "../db/services";
 
 const DEFAULT_IMAGE = Image.resolveAssetSource(DefaultImage).uri;
-const image = { uri: DEFAULT_IMAGE };
+
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 

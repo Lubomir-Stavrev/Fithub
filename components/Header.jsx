@@ -1,5 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { Dimensions } from "react-native";
+const { height, width } = Dimensions.get("window");
 
 export default function Header({ navigation }) {
 	const openMenu = () => {
@@ -20,7 +22,7 @@ export default function Header({ navigation }) {
 	);
 }
 
-const width_proportion = 365;
+const width_proportion = width > height ? height : width + 10;
 const height_proportion = "100%";
 
 const styles = StyleSheet.create({
@@ -37,7 +39,8 @@ const styles = StyleSheet.create({
 	menuBar: {
 		backgroundColor: "#171717",
 		marginLeft: 20,
-		marginTop: 30
+		marginTop: 30,
+		zIndex: 100
 	},
 	bar: {
 		width: 32,
@@ -45,7 +48,8 @@ const styles = StyleSheet.create({
 		backgroundColor: "#d5990c",
 		marginBottom: 4,
 		borderWidth: 1,
-		borderRadius: 20
+		borderRadius: 20,
+		zIndex: 100
 	},
 	title: {
 		right: 20,

@@ -212,7 +212,7 @@ export default function routines({ onChangeState, changeView }) {
 				<View
 					style={{
 						height: 1.6,
-						width: 300,
+						width: 330,
 						borderRadius: 1000
 					}}></View>
 			</LinearGradient>
@@ -222,9 +222,6 @@ export default function routines({ onChangeState, changeView }) {
 
 const styles = StyleSheet.create({
 	body: {
-		borderBottomWidth: 1.5,
-		borderColor: "#ccc",
-		borderRadius: 20,
 		width: "91%",
 		height: "83%",
 		backgroundColor: "rgba(18, 18, 19,0.6)",

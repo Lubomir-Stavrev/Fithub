@@ -20,13 +20,15 @@ const RootDrawerNavigator = createDrawerNavigator(
 			<SideBar
 				{...props}
 				style={{ backgroundColor: "#ffff" }}
-				getLabel={(scene) => (
-					<View style={styles.container}>
-						<Text style={styles.optionText}>
-							{props.getLabel(scene)}
-						</Text>
-					</View>
-				)}
+				getLabel={(scene) => {
+					return props.getLabel(scene) != "Auth" ? (
+						<View style={styles.container}>
+							<Text style={styles.optionText}>
+								{props.getLabel(scene)}
+							</Text>
+						</View>
+					) : null;
+				}}
 			/>
 		)
 	}
