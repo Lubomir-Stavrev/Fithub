@@ -16,8 +16,12 @@ import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import services from "../../../db/services";
 
+import { Entypo } from '@expo/vector-icons';
+
 export default function routines({ onChangeState, changeView }) {
 	const [exercises, setExercises] = useState({});
+	const [isWorkoutEnded, setIsWorkoutEnded] = useState(true);
+	const [prevWorkoutId, setPrevWorkoutId] = useState();
 
 	const [name, setName] = useState();
 	const [notes, setNotes] = useState();
@@ -29,6 +33,24 @@ export default function routines({ onChangeState, changeView }) {
 			setExercises(await data);
 		}
 	}, []);
+	useEffect(async () => {
+		try {
+			let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
+
+			if (await prevWorkout) {
+				setPrevWorkoutId(prev => prevWorkout.routineId)
+				setIsWorkoutEnded(false);
+			}
+		} catch (err) {
+			console.log(err);
+
+		}
+	}, [])
+
+	const onRoutineCick = (routineId) => {
+
+		changeView("RenderRoutines", routineId);
+	};
 
 	const setExercisesData = async () => {
 		try {
@@ -62,7 +84,7 @@ export default function routines({ onChangeState, changeView }) {
 						name: name,
 						notes: notes
 					})
-				).then((res) => {});
+				).then((res) => { });
 			} catch (error) {
 				console.log(error);
 			}
@@ -216,6 +238,22 @@ export default function routines({ onChangeState, changeView }) {
 						borderRadius: 1000
 					}}></View>
 			</LinearGradient>
+			{!isWorkoutEnded ?
+				<TouchableOpacity
+					onPress={(e) => onRoutineCick(prevWorkoutId)}
+					style={{
+						backgroundColor: "rgba(255, 204, 29,0.7)",
+						padding: 7,
+						position: "absolute",
+						bottom: '24%',
+						right: '10%',
+						borderRadius: 24
+					}}>
+					<View>
+						<Entypo name="back-in-time" size={38} color="rgba(255, 255, 255,0.7)" />
+					</View>
+				</TouchableOpacity>
+				: null}
 		</>
 	);
 }

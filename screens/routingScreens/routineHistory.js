@@ -13,12 +13,17 @@ import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Fontisto } from "@expo/vector-icons";
 import moment from "moment";
+import { Entypo } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function routineHistory({ changeView, navigation }) {
 	const [routines, setRoutines] = useState();
+	const [isWorkoutEnded, setIsWorkoutEnded] = useState(true);
+	const [prevWorkoutId, setPrevWorkoutId] = useState();
 
 	useEffect(() => {
 		const getRoutines = async () => {
+
 			let data = await services.getAllRoutines();
 			if (await data) {
 				let workouts = [];
@@ -43,6 +48,7 @@ export default function routineHistory({ changeView, navigation }) {
 					}
 				});
 				if (await workouts) {
+
 					console.log("==========");
 					console.log(workouts);
 					console.log("==========");
@@ -62,6 +68,20 @@ export default function routineHistory({ changeView, navigation }) {
 		};
 		getRoutines();
 	}, []);
+	useEffect(async () => {
+		try {
+
+			let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
+
+			if (await prevWorkout) {
+				setPrevWorkoutId(prev => prevWorkout.routineId)
+				setIsWorkoutEnded(false);
+			}
+		} catch (err) {
+			console.log(err);
+
+		}
+	}, [])
 
 	const openRoutine = ({ wId, rId }) => {
 		changeView("ViewWorkout", { routineId: rId, workoutId: wId });
@@ -78,7 +98,10 @@ export default function routineHistory({ changeView, navigation }) {
 			setRoutines((prev) => newData);
 		});
 	};
+	const onRoutineCick = (routineId) => {
 
+		changeView("RenderRoutines", routineId);
+	};
 	return (
 		<>
 			<View style={styles.body}>
@@ -110,7 +133,7 @@ export default function routineHistory({ changeView, navigation }) {
 									size={20}
 									color="white"
 									style={{
-										right: "40.5%",
+										right: "41%",
 										top: 22,
 										position: "absolute"
 									}}
@@ -134,7 +157,7 @@ export default function routineHistory({ changeView, navigation }) {
 										margin: 0,
 										position: "absolute",
 										borderBottomRightRadius: 10,
-										borderTopRightRadius: 10
+										borderTopRightRadius: 10,
 									}}
 									onPress={() =>
 										deleteWorkout(
@@ -177,18 +200,22 @@ export default function routineHistory({ changeView, navigation }) {
 						borderRadius: 1000
 					}}></View>
 			</LinearGradient>
-			<TouchableOpacity
-				style={{
-					backgroundColor: "red",
-					padding: 20,
-					position: "absolute",
-					bottom: 80
-				}}
-				onPress={() => navigation.goBack()}>
-				<View>
-					<Text>GO BACK</Text>
-				</View>
-			</TouchableOpacity>
+			{!isWorkoutEnded ?
+				<TouchableOpacity
+					onPress={(e) => onRoutineCick(prevWorkoutId)}
+					style={{
+						backgroundColor: "rgba(255, 204, 29,0.7)",
+						padding: 7,
+						position: "absolute",
+						bottom: '14%',
+						right: '7%',
+						borderRadius: 24
+					}}>
+					<View>
+						<Entypo name="back-in-time" size={38} color="rgba(255, 255, 255,0.7)" />
+					</View>
+				</TouchableOpacity>
+				: null}
 		</>
 	);
 }

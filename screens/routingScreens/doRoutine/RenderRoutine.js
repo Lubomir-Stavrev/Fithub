@@ -46,11 +46,14 @@ export default function renderRoutine({ routineId, changeView }) {
 
         return () => {
             setIsStopwatchStart((prev) => {
+                console.log(prev);
                 if (prev) {
                     try {
                         let lastNotes;
                         let lastTime;
                         let lastRoutineData;
+                        let lastExerciseData;
+                        let lastPrevExercises;
                         setNotes((prev) => {
                             lastNotes = prev;
                             return prev;
@@ -63,10 +66,21 @@ export default function renderRoutine({ routineId, changeView }) {
                             lastRoutineData = prev;
                             return prev;
                         });
+                        setData((prev) => {
+                            console.log(prev == null);
+                            lastExerciseData = prev
+                            return prev;
+                        })
+                        setPrevExercises(prev => {
+                            lastPrevExercises = prev
+                            return;
+                        })
+
                         AsyncStorage.setItem(
                             "prevWorkout",
                             JSON.stringify({
-                                routineExercises: data,
+
+                                routineExercises: Object.keys(lastExerciseData).length !== 0 ? lastExerciseData : lastPrevExercises,
                                 notes: lastNotes,
                                 routineId: routineId,
                                 time: lastTime,
@@ -140,7 +154,6 @@ export default function renderRoutine({ routineId, changeView }) {
                             }
                             setPrevExercises((prev) => exercises);
 
-                            AsyncStorage.removeItem("prevWorkout");
                         } catch (err) {
                             console.log(err);
                         }
@@ -195,6 +208,7 @@ export default function renderRoutine({ routineId, changeView }) {
         } catch (e) {
             console.log(e);
         }
+        AsyncStorage.removeItem("prevWorkout");
     };
     const getFormattedTime = (time) => {
         setTime((prev) => {

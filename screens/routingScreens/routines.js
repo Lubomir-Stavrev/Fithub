@@ -10,9 +10,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign } from "@expo/vector-icons";
 import services from "../../db/services";
+import { Entypo } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function routines({ changeView }) {
 	const [routines, setRoutines] = useState();
+	const [isWorkoutEnded, setIsWorkoutEnded] = useState(true);
+	const [prevWorkoutId, setPrevWorkoutId] = useState();
 
 	useEffect(() => {
 		const func = async () => {
@@ -23,8 +27,23 @@ export default function routines({ changeView }) {
 		};
 		func();
 	}, []);
+	useEffect(async () => {
+		try {
+
+			let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
+
+			if (await prevWorkout) {
+				setPrevWorkoutId(prev => prevWorkout.routineId)
+				setIsWorkoutEnded(false);
+			}
+		} catch (err) {
+			console.log(err);
+
+		}
+	}, [])
 
 	const onRoutineCick = (routineId) => {
+
 		changeView("RenderRoutines", routineId);
 	};
 
@@ -94,6 +113,22 @@ export default function routines({ changeView }) {
 						borderRadius: 1000
 					}}></View>
 			</LinearGradient>
+			{!isWorkoutEnded ?
+				<TouchableOpacity
+					onPress={(e) => onRoutineCick(prevWorkoutId)}
+					style={{
+						backgroundColor: "rgba(255, 204, 29,0.7)",
+						padding: 7,
+						position: "absolute",
+						bottom: '14%',
+						right: '7%',
+						borderRadius: 24
+					}}>
+					<View>
+						<Entypo name="back-in-time" size={38} color="rgba(255, 255, 255,0.7)" />
+					</View>
+				</TouchableOpacity>
+				: null}
 		</>
 	);
 }
