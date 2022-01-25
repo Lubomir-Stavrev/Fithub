@@ -21,11 +21,11 @@ export default {
 				try {
 					const jsonValue = JSON.stringify({
 						uid: data.user.uid,
-						email,
+						email: email.trim(),
 						username: "asd"
 					});
-					await AsyncStorage.setItem("auth", jsonValue);
-					console.log(data);
+					return await AsyncStorage.setItem("auth", jsonValue);
+
 				} catch (e) {
 					console.log(e);
 				}
@@ -42,7 +42,7 @@ export default {
 				await fetch(usersURL, {
 					method: "POST",
 					body: JSON.stringify({
-						email,
+						email: email.trim(),
 						username
 					})
 				});

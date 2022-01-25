@@ -9,7 +9,7 @@ module.exports = StyleSheet.create({
 	body: {
 		borderRadius: 20,
 		width: "80%",
-		height: "60%",
+		height: "65%",
 		marginTop: "10%",
 		alignItems: "center",
 		textAlign: "center"
@@ -19,7 +19,7 @@ module.exports = StyleSheet.create({
 		fontSize: 45,
 		color: "#ffff",
 		letterSpacing: 4,
-		top: 15,
+		top: 10,
 		position: "relative"
 	},
 	image: {
@@ -31,7 +31,7 @@ module.exports = StyleSheet.create({
 		height: 53,
 		width: 290,
 		padding: 5,
-		marginBottom: 20,
+		marginBottom: 15,
 		borderRadius: 7,
 		backgroundColor: "rgba(255, 255, 255,0.95)",
 		fontSize: 20,

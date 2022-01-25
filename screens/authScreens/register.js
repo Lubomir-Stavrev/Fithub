@@ -49,7 +49,7 @@ export default function Register({ navigation }) {
 				<Text style={styles.title}>Create your account!</Text>
 				<View style={styles.body}>
 					<KeyboardAvoidingView
-						behavior={Platform.OS === "ios" ? "padding" : "height"}
+						behavior="height"
 						style={{ alignItems: "center" }}>
 						<SafeAreaView style={styles.inputContainer}>
 							<TextInput
@@ -83,11 +83,13 @@ export default function Register({ navigation }) {
 								style={styles.input}
 								placeholder="Password"
 								onChangeText={(text) => setPassword(text)}
+								secureTextEntry={true}
 							/>
 							<TextInput
 								style={styles.input}
 								placeholder="Confirm password"
 								onChangeText={(text) => setRepPassword(text)}
+								secureTextEntry={true}
 							/>
 							<TouchableOpacity
 								onPress={() => registerAccount()}

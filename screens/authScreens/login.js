@@ -26,6 +26,7 @@ export default function Login({ navigation }) {
 			services
 				.login(email, password)
 				.then((res) => {
+					console.log(res)
 					navigation.navigate("Home");
 				})
 				.catch((err) => {
@@ -52,6 +53,7 @@ export default function Login({ navigation }) {
 							<TextInput
 								style={styles.input}
 								placeholder="Password"
+								secureTextEntry={true}
 								onChangeText={(text) => setPassword(text)}
 							/>
 							<TouchableOpacity
@@ -70,7 +72,7 @@ export default function Login({ navigation }) {
 							<Text
 								style={[
 									styles.moreInfo,
-									{ top: 20, fontSize: 19 }
+									{ top: 20, fontSize: 19, paddingBottom: 30 }
 								]}>
 								Don't have an account yet?
 							</Text>

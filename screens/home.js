@@ -130,14 +130,21 @@ export default function Home({ navigation }) {
 						<TouchableOpacity onPress={() => changeView("routes")}>
 							<FontAwesome5
 								name="dumbbell"
-								style={{ marginTop: 10, marginRight: 21 }}
-								size={35}
+								style={{ marginTop: 2.5, marginRight: 21 }}
+								size={34}
 								color={
 									routines || renderRoutine
 										? "#d5990c"
 										: "#ccc"
 								}
 							/>
+							<Text style={{
+								fontSize: 14, color:
+									routines || renderRoutine
+										? "#d5990c"
+										: "#ccc",
+								left: '-13%'
+							}}>Routines</Text>
 						</TouchableOpacity>
 					</View>
 					<TouchableOpacity
@@ -146,9 +153,19 @@ export default function Home({ navigation }) {
 						<View>
 							<SimpleLineIcons
 								name="plus"
-								size={37}
+								size={35}
+								style={{ marginTop: -7 }}
 								color={addRoutine ? "#d5990c" : "#ccc"}
 							/>
+							<Text style={{
+								fontSize: 13, color:
+									addRoutine ? "#d5990c" : "#ccc",
+								position: 'absolute',
+								width: 78,
+								top: 30,
+								right: -26
+
+							}}>Add Routine</Text>
 						</View>
 					</TouchableOpacity>
 					<View>
@@ -156,7 +173,7 @@ export default function Home({ navigation }) {
 							<FontAwesome
 								name="pencil"
 								style={{
-									marginTop: 12,
+									marginTop: 5,
 									marginLeft: 30,
 									marginRight: 5
 								}}
@@ -165,6 +182,10 @@ export default function Home({ navigation }) {
 									history || viewWorkout ? "#d5990c" : "#ccc"
 								}
 							/>
+							<Text style={{
+								fontSize: 13, color: history || viewWorkout ? "#d5990c" : "#ccc",
+								right: "-40%"
+							}}>Logs</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
