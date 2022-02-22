@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import services from "../../../db/services";
 
 import { Entypo } from '@expo/vector-icons';
+import { AdMobBanner, AdMobInterstitial } from "expo-ads-admob";
 
 export default function routines({ onChangeState, changeView }) {
 	const [exercises, setExercises] = useState({});
@@ -26,24 +27,42 @@ export default function routines({ onChangeState, changeView }) {
 	const [name, setName] = useState();
 	const [notes, setNotes] = useState();
 
+	const [bannerAdId, setBannerAdId] = useState("ca-app-pub-7464607351320039/2455978652");
+	const [interstitialAdId, setInterstitialAdId] = useState("ca-app-pub-7464607351320039/3681430414");
+
 	useEffect(async () => {
 		let data = await setExercisesData();
+
+		/* 	try {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync();
+				await AdMobInterstitial.showAdAsync();
+	
+			} catch (e) {
+				console.log(e);
+			} */
 
 		if (await data) {
 			setExercises(await data);
 		}
 	}, []);
 	useEffect(async () => {
-		try {
-			let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
+		let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
+		if (prevWorkout) {
 
-			if (await prevWorkout) {
-				setPrevWorkoutId(prev => prevWorkout.routineId)
+			let prevRoutineId = await prevWorkout?.routineId;
+			let allRoutines = await services.getAllRoutines();
+			let isTheRoutineStillAvailable = false;
+
+			Object.values(await allRoutines).forEach(r => {
+				if (prevRoutineId === r?.routineId) {
+					isTheRoutineStillAvailable = true;
+				}
+			})
+			if (await prevWorkout, isTheRoutineStillAvailable) {
+				setPrevWorkoutId(prev => prevWorkout?.routineId);
 				setIsWorkoutEnded(false);
 			}
-		} catch (err) {
-			console.log(err);
-
 		}
 	}, [])
 
@@ -122,8 +141,59 @@ export default function routines({ onChangeState, changeView }) {
 			console.log(error);
 		}
 	};
+
+	const editExercise = async (itemId) => {
+		let exerciseName = "";
+		let sets = "";
+		try {
+			let data = await exercises;
+
+			let newData = Object.values(data).filter((el) => {
+				console.log("From AddRoutine")
+				if (el.id === itemId) {
+					console.log(el.exerciseName)
+					console.log(el.sets)
+					exerciseName = el.exerciseName;
+					sets = el.sets;
+
+				}
+				return el.id !== itemId;
+			});
+			await AsyncStorage.setItem("exercises", JSON.stringify(newData));
+			setExercises((prev) => {
+				return newData;
+			});
+		} catch (error) {
+			console.log(error);
+		}
+		if (name || notes) {
+			try {
+				await AsyncStorage.setItem(
+					"routineInfo",
+					JSON.stringify({
+						name: name,
+						notes: notes
+					})
+				).then((res) => { });
+			} catch (error) {
+				console.log(error);
+			}
+		}
+
+		if (exerciseName != "" && sets != "") {
+			onChangeState({
+				state: true,
+				exerciseName,
+				sets
+			});
+		}
+	}
 	return (
 		<>
+			<AdMobBanner
+				bannerSize="banner"
+				adUnitID={bannerAdId}
+			/>
 			<View style={styles.body}>
 				<KeyboardAvoidingView
 					behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -146,7 +216,9 @@ export default function routines({ onChangeState, changeView }) {
 					data={exercises ? exercises : null}
 					keyExtractor={(item) => item.id}
 					renderItem={({ item }) => (
-						<>
+						<TouchableOpacity
+							onPress={() => editExercise(item.id)}>
+
 							<View style={styles.item}>
 								<Text
 									style={{
@@ -154,7 +226,7 @@ export default function routines({ onChangeState, changeView }) {
 										fontSize: 20,
 										position: "absolute",
 										left: 15,
-										top: 15
+										top: 15,
 									}}>
 									{item.exerciseName}
 								</Text>
@@ -204,7 +276,8 @@ export default function routines({ onChangeState, changeView }) {
 									</View>
 								</TouchableOpacity>
 							</View>
-						</>
+						</TouchableOpacity>
+
 					)}
 				/>
 				<TouchableOpacity
@@ -261,12 +334,12 @@ export default function routines({ onChangeState, changeView }) {
 const styles = StyleSheet.create({
 	body: {
 		width: "91%",
-		height: "83%",
+		height: "80%",
 		backgroundColor: "rgba(18, 18, 19,0.6)",
 		marginTop: 0,
 		marginBottom: 40,
 		alignItems: "center",
-		paddingBottom: 90,
+		paddingBottom: 80,
 		paddingTop: 10
 	},
 	input: {
@@ -337,12 +410,13 @@ const styles = StyleSheet.create({
 		color: "#ffff",
 		width: 300,
 		height: 60,
-		zIndex: 100,
 		marginTop: 10,
 		fontSize: 20,
 		paddingLeft: 20,
 		paddingRight: 50,
 		paddingTop: 15,
-		flexDirection: "row"
+		flexDirection: "row",
+		flex: 1
+
 	}
 });

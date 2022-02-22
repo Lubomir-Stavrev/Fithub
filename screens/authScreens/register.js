@@ -18,6 +18,7 @@ const image = { uri: DEFAULT_IMAGE };
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import services from "../../db/services";
+import { BarPasswordStrengthDisplay } from 'react-native-password-strength-meter';
 
 const auth = getAuth();
 
@@ -26,17 +27,64 @@ export default function Register({ navigation }) {
 	const [email, setEmail] = useState();
 	const [password, setPassword] = useState();
 	const [repPassword, setRepPassword] = useState();
+	const [errorMessage, setErrorMessage] = useState();
 
 	const registerAccount = (e) => {
 		if (username && email && password) {
+			if (password == 0) {
+				setErrorMessage(prev => "Password is required feild");
+				setTimeout(() => {
+					setErrorMessage(prev => null);
+				}, 3000)
+				return;
+			} else if (password.length < 8 || password.length > 20) {
+				setErrorMessage(prev => "Password should be min 8 char and max 20 char.");
+				setTimeout(() => {
+					setErrorMessage(prev => null);
+				}, 3000)
+				return;
+			} else if (password !== repPassword) {
+				setErrorMessage(prev => "Passwoad and confirm password should be same.");
+				setTimeout(() => {
+					setErrorMessage(prev => null);
+				}, 3000)
+				return;
+			}
+
+			if (repPassword.length == 0) {
+				setErrorMessage(prev => "Confirm Password is required feild.");
+				setTimeout(() => {
+					setErrorMessage(prev => null);
+				}, 3000)
+				return;
+			} else if (repPassword.length < 8 || repPassword.length > 20) {
+				setErrorMessage(prev => "Password should be min 8 char and max 20 char.");
+				setTimeout(() => {
+					setErrorMessage(prev => null);
+				}, 3000)
+				return;
+			}
 			services
 				.register(username, email, password)
 				.then((res) => {
 					console.log(res);
-					navigation.navigate("Login");
+					if (res.err) {
+
+						setErrorMessage(prev => "The email is already been taken.");
+						setTimeout(() => {
+							setErrorMessage(prev => null);
+						}, 3000)
+						return;
+					} else {
+						navigation.navigate("Login");
+					}
 				})
 				.catch((err) => {
-					throw new Error(err);
+					setErrorMessage(prev => "The email is already been taken.");
+					setTimeout(() => {
+						setErrorMessage(prev => null);
+					}, 3000)
+					return
 				});
 		}
 	};
@@ -85,6 +133,15 @@ export default function Register({ navigation }) {
 								onChangeText={(text) => setPassword(text)}
 								secureTextEntry={true}
 							/>
+							{password ?
+								<View style={{ marginTop: -17, marginBottom: 13 }}>
+									<BarPasswordStrengthDisplay
+										password={password}
+										width={280}
+									/>
+
+								</View>
+								: null}
 							<TextInput
 								style={styles.input}
 								placeholder="Confirm password"
@@ -106,9 +163,15 @@ export default function Register({ navigation }) {
 								alignItems: "center"
 							}}
 							onPress={() => navigation.navigate("Login")}>
-							<Text style={styles.moreInfo}>
-								Already have an account? Login
-							</Text>
+							{errorMessage ?
+								<View style={{ borderWidth: 1, padding: 10, borderColor: "#EC4226", textAlign: 'center', alignItems: 'center' }}>
+									<Text style={{ fontSize: 15, color: '#EC4226', fontFamily: 'redcoat', letterSpacing: 2 }}>{errorMessage}</Text>
+								</View> :
+								<Text style={styles.moreInfo}>
+									Already have an account? Login
+								</Text>
+							}
+
 						</TouchableOpacity>
 					</KeyboardAvoidingView>
 				</View>

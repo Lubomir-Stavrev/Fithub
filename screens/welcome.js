@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	StyleSheet,
 	View,
@@ -9,12 +9,30 @@ import {
 
 import DefaultImage from "../assets/welcomePage.jpg";
 const DEFAULT_IMAGE = Image.resolveAssetSource(DefaultImage).uri;
+import { AdMobBanner, AdMobInterstitial } from "expo-ads-admob";
 
 const image = { uri: DEFAULT_IMAGE };
 import services from "../db/services";
 
 export default function Welcome({ navigation }) {
-	useEffect(() => {
+
+	const [bannerAdId, setBannerAdId] = useState("ca-app-pub-7464607351320039/2455978652");
+	const [interstitialAdId, setInterstitialAdId] = useState("ca-app-pub-7464607351320039/3681430414");
+
+	useEffect(async () => {
+
+		//ca-app-pub-7464607351320039/2455978652
+		//ca-app-pub-7464607351320039/3681430414
+		/* try {
+			AdMobInterstitial.setAdUnitID(interstitialAdId);
+			await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+			await AdMobInterstitial.showAdAsync();
+
+		} catch (e) {
+			console.log(e);
+		} */
+
+
 		setTimeout(async function () {
 			let isLogged = services.isLogged();
 			if (await isLogged) {
@@ -33,6 +51,11 @@ export default function Welcome({ navigation }) {
 				source={image}
 				style={styles.image}>
 				<View style={styles.loadingSpinner}>
+					<AdMobBanner
+						bannerSize="banner"
+						adUnitID={bannerAdId}
+						servePersonaLizedAds={false}
+					/>
 					<ActivityIndicator size="large" color="#ffff" />
 				</View>
 			</ImageBackground>

@@ -17,9 +17,15 @@ import services from "../../db/services";
 const DEFAULT_IMAGE = Image.resolveAssetSource(DefaultImage).uri;
 const image = { uri: DEFAULT_IMAGE };
 
+
+
 export default function Login({ navigation }) {
 	const [email, setEmail] = useState();
 	const [password, setPassword] = useState();
+	const [errorMessage, setErrorMessage] = useState("");
+	useEffect(() => {
+
+	}, []);
 
 	const loginAccount = (e) => {
 		if (email && password) {
@@ -27,10 +33,23 @@ export default function Login({ navigation }) {
 				.login(email, password)
 				.then((res) => {
 					console.log(res)
-					navigation.navigate("Home");
+					if (res?.err) {
+						setErrorMessage("Wrong email or password!")
+						setTimeout(() => {
+							setErrorMessage(null)
+						}, 3000)
+						return;
+					} else {
+						navigation.navigate("Home");
+					}
 				})
 				.catch((err) => {
-					throw new Error(err);
+					console.log(err);
+					setErrorMessage("Wrong email or password!")
+					setTimeout(() => {
+						setErrorMessage(null)
+					}, 3000)
+					return;
 				});
 		}
 	};
@@ -49,12 +68,14 @@ export default function Login({ navigation }) {
 								style={styles.input}
 								placeholder="E-mail"
 								onChangeText={(text) => setEmail(text)}
+								maxLength={45}
 							/>
 							<TextInput
 								style={styles.input}
 								placeholder="Password"
 								secureTextEntry={true}
 								onChangeText={(text) => setPassword(text)}
+								maxLength={20}
 							/>
 							<TouchableOpacity
 								onPress={() => loginAccount()}
@@ -69,13 +90,18 @@ export default function Login({ navigation }) {
 								alignItems: "center"
 							}}
 							onPress={() => navigation.navigate("Register")}>
-							<Text
-								style={[
-									styles.moreInfo,
-									{ top: 20, fontSize: 19, paddingBottom: 30 }
-								]}>
-								Don't have an account yet?
-							</Text>
+							{errorMessage ?
+								<View style={{ borderWidth: 1, padding: 10, borderColor: "#EC4226", borderBottomWidth: 1, borderBottomColor: "#EC4226" }}>
+									<Text style={{ fontSize: 22, color: '#EC4226' }}>{errorMessage}</Text>
+								</View> :
+								<Text
+									style={[
+										styles.moreInfo,
+										{ top: 20, fontSize: 19, paddingBottom: 30 }
+									]}>
+									Don't have an account yet?
+								</Text>
+							}
 						</TouchableOpacity>
 					</KeyboardAvoidingView>
 				</View>

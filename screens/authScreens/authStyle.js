@@ -47,7 +47,8 @@ module.exports = StyleSheet.create({
 	},
 	inputContainer: {
 		textAlign: "center",
-		alignItems: "center"
+		alignItems: "center",
+
 	},
 	authButton: {
 		backgroundColor: "#01a3ea",

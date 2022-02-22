@@ -52,6 +52,10 @@ export default function ViewWorkout({ ids, changeView }) {
 		}
 	}, []);
 
+	const exit = () => {
+		changeView("history");
+	}
+
 	return (
 		<>
 			<View style={styles.body}>
@@ -94,7 +98,7 @@ export default function ViewWorkout({ ids, changeView }) {
 									color: "rgba(225, 225, 225,0.95)",
 									paddingBottom: 10,
 									fontSize: 17,
-									left: 15.5,
+									left: 8,
 									alignSelf: "flex-start"
 								}}>
 								{item.exerciseName}
@@ -108,29 +112,29 @@ export default function ViewWorkout({ ids, changeView }) {
 										if (lastExercises[item.exerciseName]) {
 											if (
 												lastExercises[
-													item.exerciseName
+												item.exerciseName
 												][i]
 											) {
 												weight = lastExercises[
 													item.exerciseName
 												][i].weight
 													? lastExercises[
-															item.exerciseName
-													  ][i].weight
+														item.exerciseName
+													][i].weight
 													: "0";
 												reps = lastExercises[
 													item.exerciseName
 												][i].reps
 													? lastExercises[
-															item.exerciseName
-													  ][i].reps
+														item.exerciseName
+													][i].reps
 													: "";
 												notes = lastExercises[
 													item.exerciseName
 												][i].notes
 													? lastExercises[
-															item.exerciseName
-													  ][i].notes
+														item.exerciseName
+													][i].notes
 													: "";
 											}
 										}
@@ -141,6 +145,21 @@ export default function ViewWorkout({ ids, changeView }) {
 
 								return (
 									<View style={styles.setRow}>
+										<View style={{
+											borderColor: "white",
+											borderWidth: 1,
+											borderRadius: 300,
+											paddingLeft: 5.9,
+											paddingRight: 5.9,
+											paddingBottom: 0.9,
+											paddingTop: 0.9,
+											color: "white",
+											marginRight: 4,
+										}}>
+											<Text style={{ color: "white", fontSize: 12 }}>
+												{i + 1}
+											</Text>
+										</View>
 										<View
 											style={{
 												...styles.setCol,
@@ -187,7 +206,7 @@ export default function ViewWorkout({ ids, changeView }) {
 					</TouchableOpacity>
 					<View style={styles.doneButton}>
 						<Text style={styles.buttonText}>
-							<TouchableOpacity>
+							<TouchableOpacity onPress={() => exit()}>
 								<MaterialIcons
 									name="done"
 									size={30}
@@ -328,7 +347,7 @@ const styles = StyleSheet.create({
 		borderRadius: 6,
 		backgroundColor: "rgba(62, 62, 62,0.9)",
 		color: "#ffff",
-		width: 270,
+		width: 282,
 		height: 45,
 		padding: 4,
 		alignItems: "center",
@@ -338,7 +357,7 @@ const styles = StyleSheet.create({
 	setCol: {
 		padding: 5,
 		backgroundColor: "rgba(225, 225, 225,0.95)",
-		width: 85
+		width: 80
 	},
 	setColLeft: {
 		borderTopLeftRadius: 5,

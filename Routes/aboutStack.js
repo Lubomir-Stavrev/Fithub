@@ -4,6 +4,7 @@ import { createAppContainer } from "react-navigation";
 
 import Header from "../components/Header";
 import About from "../screens/about";
+import ContactUs from "../screens/contactUs";
 
 const screens = {
 	About: {
@@ -11,10 +12,16 @@ const screens = {
 		navigationOptions: ({ navigation }) => {
 			return {
 				headerTitle: () => <Header navigation={navigation} />,
-				headerLeft: null
+				headerLeft: null,
+				headerStyle: {
+					backgroundColor: "#171717",
+					borderBottomWidth: 1,
+					height: 55
+				}
 			};
 		}
-	}
+	},
+
 };
 
 const aboutStack = createStackNavigator(screens, {

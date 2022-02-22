@@ -9,7 +9,7 @@ export default function Header({ navigation }) {
 	};
 	return (
 		<View style={styles.header}>
-			<TouchableOpacity style={{ width: 50 }} onPress={() => openMenu()}>
+			<TouchableOpacity style={{ zIndex: 100, width: 50, height: 60, paddingBottom: 50 }} onPress={() => openMenu()}>
 				<View style={styles.menuBar}>
 					<View style={styles.bar}></View>
 					<View style={styles.bar}></View>
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "#171717",
 		borderRadius: 23,
 		paddingBottom: 10,
-		fontFamily: "redCoat-Bold"
+		fontFamily: "redCoat-Bold",
 	},
 	menuBar: {
 		backgroundColor: "#171717",

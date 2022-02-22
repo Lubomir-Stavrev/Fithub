@@ -17,6 +17,16 @@ export default function routines(props) {
 	const [exerciseName, setExerciseName] = useState();
 	const [sets, addSets] = useState();
 
+	useEffect(async () => {
+		console.log(await props);
+		if (await props.exercise.exerciseName) {
+			console.log(props.exercise.exerciseName)
+			setExerciseName(prev => props.exercise.exerciseName)
+			addSets(prev => props.exercise.sets)
+
+		}
+	}, [])
+
 	const changeViewState = () => {
 		if (exerciseName && sets) {
 			saveExercises().then((res) => {
@@ -53,13 +63,17 @@ export default function routines(props) {
 						style={styles.input}
 						placeholder="Exercise Name"
 						onChangeText={(text) => setExerciseName(text)}
+						defaultValue={exerciseName}
 					/>
+
 					<TextInput
 						style={styles.input}
 						placeholder="addSets"
 						keyboardType="numeric"
 						onChangeText={(text) => addSets(text)}
+						defaultValue={sets}
 					/>
+
 				</SafeAreaView>
 			</KeyboardAvoidingView>
 			<TouchableOpacity

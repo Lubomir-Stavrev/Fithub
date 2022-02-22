@@ -6,14 +6,19 @@ import { StyleSheet, Text, View } from "react-native";
 import HomeStack from "./homeStack";
 import AuthStack from "./authStack";
 import AboutStack from "./aboutStack";
-
+import ContactStack from "./contactStack";
+import CalendarStack from "./calendarStack";
 import SideBar from "../components/SideBar";
-
+import { AntDesign } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 const RootDrawerNavigator = createDrawerNavigator(
 	{
 		Home: { screen: HomeStack },
+		Calendar: { screen: CalendarStack },
 		About: { screen: AboutStack },
-		Auth: { screen: AuthStack }
+		Auth: { screen: AuthStack },
+		"Contact Us": { screen: ContactStack }
 	},
 	{
 		contentComponent: (props) => (
@@ -23,6 +28,12 @@ const RootDrawerNavigator = createDrawerNavigator(
 				getLabel={(scene) => {
 					return props.getLabel(scene) != "Auth" ? (
 						<View style={styles.container}>
+							{props.getLabel(scene) == "Home" ? <AntDesign name="home" style={styles.iconStyle} size={24} color="white" /> : null}
+							{props.getLabel(scene) == "About" ? <AntDesign name="infocirlceo" style={styles.iconStyle} size={24} color="white" /> : null}
+							{props.getLabel(scene) == "Contact Us" ? <AntDesign name="questioncircleo" style={styles.iconStyle} size={24} color="white" /> : null}
+							{props.getLabel(scene) == "Calendar" ? <MaterialCommunityIcons name="calendar-edit" style={styles.iconStyle} size={24} color="white" /> : null}
+
+
 							<Text style={styles.optionText}>
 								{props.getLabel(scene)}
 							</Text>
@@ -36,19 +47,25 @@ const RootDrawerNavigator = createDrawerNavigator(
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: "#d5990c",
+		backgroundColor: "rgba(32, 32, 32, 1)",
 		height: 40,
-		width: 277,
-		marginTop: 15,
+		width: 270,
+		marginTop: 10,
 		justifyContent: "center",
 		alignItems: "center",
-		position: "relative"
+		position: "relative",
+		flex: 1,
+		flexDirection: 'row',
+		borderColor: "#d5990c",
+		borderBottomWidth: 1
 	},
 	optionText: {
-		color: "#202020",
+		color: "white",
 		fontSize: 21,
 		fontFamily: "redcoat",
 		letterSpacing: 3
+	}, iconStyle: {
+		left: "8%", position: "absolute"
 	}
 });
 

@@ -9,7 +9,8 @@ import {
 	TouchableOpacity,
 	BackHandler,
 	Alert,
-	Text
+	Text,
+	Keyboard
 } from "react-native";
 
 import { FontAwesome } from "@expo/vector-icons";
@@ -26,15 +27,41 @@ import AddRoutine from "./routingScreens/addRoutine/AddRouter";
 import RenderRoutine from "./routingScreens/doRoutine/RenderRoutine";
 import ViewWorkout from "./routingScreens/ViewWorkout";
 
+import * as Animatable from 'react-native-animatable';
+import services from "../db/services";
+
 export default function Home({ navigation }) {
 	const [routines, setRoutines] = useState(true);
 	const [history, setHistory] = useState(false);
 	const [addRoutine, setAddRoutine] = useState(false);
 	const [renderRoutine, setRenderRoutine] = useState(false);
 	const [viewWorkout, setViewWorkout] = useState(false);
+	const [areThereRoutines, setAreThereRoutines] = useState(false);
 
 	const [renderRoutineId, setRoutineId] = useState();
 	const [renderWorkoutId, setWorkoutId] = useState();
+	const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+	useEffect(() => {
+		const keyboardDidShowListener = Keyboard.addListener(
+			"keyboardDidShow",
+			() => {
+				setKeyboardVisible(true);
+			}
+		);
+		const keyboardDidHideListener = Keyboard.addListener(
+			"keyboardDidHide",
+			() => {
+				setKeyboardVisible(false);
+			}
+		);
+
+		return () => {
+			keyboardDidHideListener.remove();
+			keyboardDidShowListener.remove();
+		};
+	}, []);
+
 	const changeView = (viewState, param) => {
 		if (viewState === "history") {
 			setRoutines((prev) => false);
@@ -73,6 +100,16 @@ export default function Home({ navigation }) {
 	};
 
 	useEffect(() => {
+		services.getAllRoutines().then(res => {
+			if (Object.keys(res).length === 0
+				&& Object.getPrototypeOf(res) === Object.prototype) {
+				setAreThereRoutines(prev => false);
+
+			} else {
+				setAreThereRoutines(prev => true);
+
+			}
+		})
 		const backAction = () => {
 			Alert.alert("Hold on!", "Are you sure you want to go back?", [
 				{
@@ -122,73 +159,97 @@ export default function Home({ navigation }) {
 							renderRoutineId && renderWorkoutId
 								? { rId: renderRoutineId, wId: renderWorkoutId }
 								: null
-						}></ViewWorkout>
+						} changeView={changeView}></ViewWorkout>
 				) : null}
-
-				<View style={styles.footer}>
-					<View>
-						<TouchableOpacity onPress={() => changeView("routes")}>
-							<FontAwesome5
-								name="dumbbell"
-								style={{ marginTop: 2.5, marginRight: 21 }}
-								size={34}
-								color={
-									routines || renderRoutine
-										? "#d5990c"
-										: "#ccc"
-								}
-							/>
-							<Text style={{
-								fontSize: 14, color:
-									routines || renderRoutine
-										? "#d5990c"
-										: "#ccc",
-								left: '-13%'
-							}}>Routines</Text>
-						</TouchableOpacity>
-					</View>
-					<TouchableOpacity
-						onPress={() => changeView("addRoutine")}
-						style={styles.routineButton}>
+				{!isKeyboardVisible ?
+					<View style={styles.footer}>
 						<View>
-							<SimpleLineIcons
-								name="plus"
-								size={35}
-								style={{ marginTop: -7 }}
-								color={addRoutine ? "#d5990c" : "#ccc"}
-							/>
-							<Text style={{
-								fontSize: 13, color:
-									addRoutine ? "#d5990c" : "#ccc",
-								position: 'absolute',
-								width: 78,
-								top: 30,
-								right: -26
-
-							}}>Add Routine</Text>
+							<TouchableOpacity onPress={() => changeView("routes")}>
+								<FontAwesome5
+									name="dumbbell"
+									style={{ marginTop: 2.5, marginRight: 21 }}
+									size={34}
+									color={
+										routines || renderRoutine
+											? "#d5990c"
+											: "#ccc"
+									}
+								/>
+								<Text style={{
+									fontSize: 14, color:
+										routines || renderRoutine
+											? "#d5990c"
+											: "#ccc",
+									left: '-13%'
+								}}>Routines</Text>
+							</TouchableOpacity>
 						</View>
-					</TouchableOpacity>
-					<View>
-						<TouchableOpacity onPress={() => changeView("history")}>
-							<FontAwesome
-								name="pencil"
-								style={{
-									marginTop: 5,
-									marginLeft: 30,
-									marginRight: 5
-								}}
-								size={34}
-								color={
-									history || viewWorkout ? "#d5990c" : "#ccc"
-								}
-							/>
-							<Text style={{
-								fontSize: 13, color: history || viewWorkout ? "#d5990c" : "#ccc",
-								right: "-40%"
-							}}>Logs</Text>
+						<TouchableOpacity
+							onPress={() => changeView("addRoutine")}
+							style={styles.routineButton}>
+							{
+								!areThereRoutines ?
+									<Animatable.View animation="pulse" easing="ease-out" iterationCount="infinite" style={{ textAlign: 'center' }}>
+
+										<SimpleLineIcons
+											name="plus"
+											size={35}
+											style={{ marginTop: -7 }}
+											color={addRoutine ? "#d5990c" : "#ccc"}
+										/>
+										<Text style={{
+											fontSize: 13, color:
+												addRoutine ? "#d5990c" : "#ccc",
+											position: 'absolute',
+											width: 78,
+											top: 30,
+											right: -26
+
+										}}>Add Routine</Text>
+
+									</Animatable.View>
+									: <>
+										<SimpleLineIcons
+											name="plus"
+											size={35}
+											style={{ marginTop: -7 }}
+											color={addRoutine ? "#d5990c" : "#ccc"}
+										/>
+										<Text style={{
+											fontSize: 13, color:
+												addRoutine ? "#d5990c" : "#ccc",
+											position: 'absolute',
+											width: 78,
+											top: 30,
+											right: -26
+
+										}}>Add Routine</Text>
+									</>
+							}
+
 						</TouchableOpacity>
+						<View>
+							<TouchableOpacity onPress={() => changeView("history")}>
+								<FontAwesome
+									name="pencil"
+									style={{
+										marginTop: 5,
+										marginLeft: 30,
+										marginRight: 5
+									}}
+									size={34}
+									color={
+										history || viewWorkout ? "#d5990c" : "#ccc"
+									}
+								/>
+								<Text style={{
+									fontSize: 13, color: history || viewWorkout ? "#d5990c" : "#ccc",
+									right: "-40%"
+								}}>Logs</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
-				</View>
+					: null}
 			</ImageBackground>
 		</View>
 	);

@@ -24,29 +24,30 @@ export default function renderRoutine({ routineId, changeView }) {
     const [data, setData] = useState({});
     const [notes, setNotes] = useState();
     const [lastExercises, setLastExercises] = useState();
-    const [prevExercises, setPrevExercises] = useState();
+    const [prevExercises, setPrevExercises] = useState({});
     const [isStopwatchStart, setIsStopwatchStart] = useState(false);
     const [resetStopwatch, setResetStopwatch] = useState(false);
     const [time, setTime] = useState();
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+    const [isNoteActivated, setIsNoteActivated] = useState(false);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
             "keyboardDidShow",
-            () => {
+            (e) => {
                 setKeyboardVisible(true);
             }
         );
         const keyboardDidHideListener = Keyboard.addListener(
             "keyboardDidHide",
-            () => {
+            (e) => {
                 setKeyboardVisible(false);
             }
         );
 
         return () => {
             setIsStopwatchStart((prev) => {
-                console.log(prev);
+                console.log('asd')
                 if (prev) {
                     try {
                         let lastNotes;
@@ -67,8 +68,7 @@ export default function renderRoutine({ routineId, changeView }) {
                             return prev;
                         });
                         setData((prev) => {
-                            console.log(prev == null);
-                            lastExerciseData = prev
+                            lastExerciseData = prev;
                             return prev;
                         })
                         setPrevExercises(prev => {
@@ -80,7 +80,7 @@ export default function renderRoutine({ routineId, changeView }) {
                             "prevWorkout",
                             JSON.stringify({
 
-                                routineExercises: Object.keys(lastExerciseData).length !== 0 ? lastExerciseData : lastPrevExercises,
+                                routineExercises: Object.keys(lastPrevExercises).length !== 0 ? lastPrevExercises : lastExerciseData,
                                 notes: lastNotes,
                                 routineId: routineId,
                                 time: lastTime,
@@ -119,18 +119,27 @@ export default function renderRoutine({ routineId, changeView }) {
                     });
 
                     if (await lastWorkout?.allExercises) {
-                        setLastExercises((prev) => lastWorkout.allExercises);
+                        setLastExercises((prev) => lastWorkout?.allExercises);
+                    }
+                    let prevName;
+                    try {
+                        prevName = await JSON.parse(await AsyncStorage.getItem("prevWorkout"))?.routineData;
+
+                    } catch (e) {
+                        console.log(e)
                     }
 
-                    if (await AsyncStorage.getItem("prevWorkout")) {
+
+                    if ((await AsyncStorage.getItem("prevWorkout") &&
+                        await prevName?.routineName === data?.routineName)) {
                         try {
                             let exercises = await JSON.parse(
                                 await AsyncStorage.getItem("prevWorkout")
-                            ).routineExercises;
+                            )?.routineExercises;
 
                             let time = await JSON.parse(
                                 await AsyncStorage.getItem("prevWorkout")
-                            ).time;
+                            )?.time;
                             if (time) {
                                 let convertedTimeInMilliseconds =
                                     Number(time.split(":")[0]) * 60 * 60 * 1000 +
@@ -143,8 +152,10 @@ export default function renderRoutine({ routineId, changeView }) {
 
                             let notes = await JSON.parse(
                                 await AsyncStorage.getItem("prevWorkout")
-                            ).notes;
+                            )?.notes;
                             if (notes) {
+
+                                setNotes(prev => notes);
                                 setRoutineData((prev) => {
                                     prev.routineNotes = notes;
 
@@ -168,7 +179,14 @@ export default function renderRoutine({ routineId, changeView }) {
         }
     }, []);
     const addSet = (text) => {
-        let arr = data;
+        let arr;
+        setPrevExercises(prev => {
+            arr = prev;
+            return prev
+        })
+
+
+
         if (arr[text.exerciseName]) {
             if (arr[text.exerciseName][text.set]) {
                 arr[text.exerciseName][text.set][text.type] = text.value;
@@ -184,7 +202,6 @@ export default function renderRoutine({ routineId, changeView }) {
                 },
             };
         }
-        setData((prev) => arr);
     };
     const endWorkout = (e) => {
         var today = new Date();
@@ -198,10 +215,11 @@ export default function renderRoutine({ routineId, changeView }) {
         let fullDate = moment().format("YYYY-MM-DD HH:mm:ss");
 
         try {
+            console.log(notes);
             services
-                .saveExercises(data, notes, routineId, time, date, fullDate)
+                .saveExercises(prevExercises, notes, routineId, time, date, fullDate)
                 .then((res) => {
-                    services.setLastExercise(data, notes, routineId).then((resp) => {
+                    services.setLastExercise(prevExercises, notes, routineId).then((resp) => {
                         changeView("Routines");
                     });
                 });
@@ -211,34 +229,35 @@ export default function renderRoutine({ routineId, changeView }) {
         AsyncStorage.removeItem("prevWorkout");
     };
     const getFormattedTime = (time) => {
+
         setTime((prev) => {
             return time;
         });
     };
     return (<>
-        <View style={{ ...styles.body, paddingBottom: isKeyboardVisible ? 0 : 90, }}>
+        <View style={{ ...styles.body, paddingBottom: isKeyboardVisible ? 0 : 90, marginBottom: isKeyboardVisible ? 0 : 40 }}>
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                {!isKeyboardVisible || isNoteActivated ?
+                    <SafeAreaView style={styles.inputContainer}>
 
-                <SafeAreaView style={styles.inputContainer}>
+                        <TextInput onSubmitEditing={Keyboard.dismiss}
+                            style={styles.input}
+                            placeholder="Routine Name"
+                            editable={false}
+                            defaultValue={routineData ? routineData?.routineName : null}
+                        />
+                        <TextInput style={styles.input}
+                            onSubmitEditing={Keyboard.dismiss}
+                            placeholder="Notes"
+                            onPressIn={() => setIsNoteActivated(true)}
+                            onChangeText={
+                                (text) => setNotes(prev => text)
+                            }
+                            defaultValue={routineData ? routineData?.routineNotes : null}
+                            maxLength={20}
+                        />
 
-                    <TextInput onSubmitEditing={Keyboard.dismiss}
-                        style={styles.input}
-                        placeholder="Routine Name"
-                        onChangeText={
-                            (text) => setName(text)
-                        }
-                        defaultValue={routineData ? routineData?.routineName : null}
-                    />
-                    <TextInput style={styles.input}
-                        onSubmitEditing={Keyboard.dismiss}
-                        placeholder="Notes"
-                        onChangeText={
-                            (text) => setNotes(text)
-                        }
-                        defaultValue={routineData ? routineData?.routineNotes : null}
-                    />
-
-                </SafeAreaView>
+                    </SafeAreaView> : null}
             </KeyboardAvoidingView>
 
             <FlatList removeClippedSubviews={false}
@@ -255,19 +274,21 @@ export default function renderRoutine({ routineId, changeView }) {
                                 color: "rgba(225, 225, 225,0.95)",
                                 paddingBottom: 10,
                                 fontSize: 17,
-                                left: 15.5,
+                                left: 5,
                                 alignSelf: "flex-start",
                             }}>
                                 {item.exerciseName}
                             </Text>
 
                             {[...Array(Number(item.sets))].map((e, i) => {
+
                                 let weight = "0";
                                 let reps = "0";
                                 let notes = "";
                                 let defaultWeight;
                                 let defaultReps;
                                 let defaultNotes;
+
                                 try {
                                     if (lastExercises) {
                                         if (lastExercises[item.exerciseName]) {
@@ -286,6 +307,7 @@ export default function renderRoutine({ routineId, changeView }) {
                                     }
                                     if (prevExercises) {
                                         if (prevExercises[item.exerciseName]) {
+
                                             if (prevExercises[item.exerciseName][i]) {
                                                 defaultWeight = prevExercises[item.exerciseName][i]
                                                     .weight ?
@@ -307,6 +329,21 @@ export default function renderRoutine({ routineId, changeView }) {
                                 return (
                                     <View style={styles.setRow}>
                                         <View style={{
+                                            borderColor: "white",
+                                            borderWidth: 1,
+                                            borderRadius: 300,
+                                            paddingLeft: 5.9,
+                                            paddingRight: 5.9,
+                                            paddingBottom: 0.9,
+                                            paddingTop: 0.9,
+                                            color: "white",
+                                            marginRight: 4,
+                                        }}>
+                                            <Text style={{ color: "white", fontSize: 12 }}>
+                                                {i + 1}
+                                            </Text>
+                                        </View>
+                                        <View style={{
                                             ...styles.setCol,
                                             ...styles.setColLeft,
                                         }}>
@@ -324,6 +361,8 @@ export default function renderRoutine({ routineId, changeView }) {
                                                             set: i,
                                                         })
                                                 }
+                                                onPressIn={() => isNoteActivated ? setIsNoteActivated(false) : null}
+                                                maxLength={5}
                                             />
 
                                         </View>
@@ -331,6 +370,7 @@ export default function renderRoutine({ routineId, changeView }) {
                                         <View style={styles.setCol}>
                                             <TextInput onSubmitEditing={Keyboard.dismiss}
                                                 style={styles.setInput}
+                                                defaultValue={defaultReps}
                                                 placeholder={`reps: ${reps}`}
                                                 onChangeText={(text) =>
                                                     addSet({
@@ -339,6 +379,8 @@ export default function renderRoutine({ routineId, changeView }) {
                                                         type: "reps",
                                                         set: i,
                                                     })}
+                                                maxLength={4}
+                                                onPressIn={() => isNoteActivated ? setIsNoteActivated(false) : null}
                                             />
                                         </View>
 
@@ -346,6 +388,7 @@ export default function renderRoutine({ routineId, changeView }) {
 
                                             <TextInput onSubmitEditing={Keyboard.dismiss}
                                                 style={styles.setInput}
+                                                defaultValue={defaultNotes}
                                                 placeholder={`notes: ${notes}`}
                                                 onChangeText={(text) =>
                                                     addSet({
@@ -354,6 +397,8 @@ export default function renderRoutine({ routineId, changeView }) {
                                                         type: "notes",
                                                         set: i,
                                                     })}
+                                                maxLength={10}
+                                                onPressIn={() => isNoteActivated ? setIsNoteActivated(false) : null}
                                             />
                                         </View>
 
@@ -412,23 +457,24 @@ export default function renderRoutine({ routineId, changeView }) {
                 </View>
             </View>
         </View>
-        <LinearGradient colors={["#d5990c", "#ffff", "#ffff"]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={{
-                marginBottom: 41,
-                marginTop: -41,
-                borderRadius: 1000,
-            }}>
+        {!isKeyboardVisible ?
+            <LinearGradient colors={["#d5990c", "#ffff", "#ffff"]}
+                start={[0, 0]}
+                end={[1, 1]}
+                style={{
+                    marginBottom: 41,
+                    marginTop: -41,
+                    borderRadius: 1000,
+                }}>
 
-            <View style={{
-                height: 1.6,
-                width: 300,
-                borderRadius: 1000,
-            }}>
+                <View style={{
+                    height: 1.6,
+                    width: 300,
+                    borderRadius: 1000,
+                }}>
 
-            </View>
-        </LinearGradient>
+                </View>
+            </LinearGradient> : null}
     </>
     );
 }
@@ -448,14 +494,10 @@ const options = {
 
 const styles = StyleSheet.create({
     body: {
-        borderBottomWidth: 1.5,
-        borderColor: "#ccc",
-        borderRadius: 20,
         width: "91%",
         height: "83%",
         backgroundColor: "rgba(18, 18, 19,0.6)",
         marginTop: 0,
-        marginBottom: 40,
         alignItems: "center",
         paddingTop: 10,
     },
@@ -541,7 +583,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         backgroundColor: "rgba(62, 62, 62,0.9)",
         color: "#ffff",
-        width: 270,
+        width: 282,
         height: 45,
         padding: 4,
         alignItems: "center",
@@ -551,7 +593,7 @@ const styles = StyleSheet.create({
     setCol: {
         padding: 5,
         backgroundColor: "rgba(225, 225, 225,0.95)",
-        width: 85,
+        width: 80,
     },
     setColLeft: {
         borderTopLeftRadius: 5,

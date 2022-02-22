@@ -18,19 +18,25 @@ export default {
 	async login(email, password) {
 		return await signInWithEmailAndPassword(auth, email, password)
 			.then(async function (data) {
+				let res;
 				try {
 					const jsonValue = JSON.stringify({
 						uid: data.user.uid,
 						email: email.trim(),
 						username: "asd"
 					});
-					return await AsyncStorage.setItem("auth", jsonValue);
+					res = await AsyncStorage.setItem("auth", jsonValue);
+					console.log(await res);
 
 				} catch (e) {
 					console.log(e);
+					return e;
 				}
+				console.log(await res);
+				return await res;
 			})
 			.catch(async (err) => {
+				console.log(err);
 				let error = {};
 				error.err = err;
 				return await error;
@@ -39,7 +45,7 @@ export default {
 	async register(username, email, password) {
 		return await createUserWithEmailAndPassword(auth, email, password)
 			.then(async function (data) {
-				await fetch(usersURL, {
+				return await fetch(usersURL, {
 					method: "POST",
 					body: JSON.stringify({
 						email: email.trim(),
@@ -48,6 +54,7 @@ export default {
 				});
 			})
 			.catch(async (err) => {
+
 				let error = {};
 				error.err = err;
 				return await error;
@@ -107,7 +114,7 @@ export default {
 	},
 
 	deleteRoutine(id) {
-		return fetch(db + id + "/.json", {
+		return fetch(db + `routines/${id}` + "/.json", {
 			method: "DELETE"
 		})
 			.then((res) => res.json())
@@ -152,6 +159,7 @@ export default {
 			});
 	},
 	saveExercises(exercises, note, id, time, date, fullDate) {
+
 		return fetch(db + `routines/${id}/allWorkouts/.json`, {
 			method: "POST",
 			body: JSON.stringify({

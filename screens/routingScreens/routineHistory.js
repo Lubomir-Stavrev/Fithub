@@ -4,26 +4,29 @@ import {
 	Text,
 	View,
 	FlatList,
-	TouchableOpacity
+	TouchableOpacity,
+	ActivityIndicator
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 import services from "../../db/services";
 import { AntDesign } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Fontisto } from "@expo/vector-icons";
-import moment from "moment";
 import { Entypo } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Shadow } from 'react-native-shadow-2';
 
 export default function routineHistory({ changeView, navigation }) {
 	const [routines, setRoutines] = useState();
 	const [isWorkoutEnded, setIsWorkoutEnded] = useState(true);
 	const [prevWorkoutId, setPrevWorkoutId] = useState();
+	const [areRoutinesLoaded, setAreRoutinesLoaded] = useState(false);
 
 	useEffect(() => {
 		const getRoutines = async () => {
-
+			setTimeout(() => {
+				setAreRoutinesLoaded(prev => true);
+			}, 1000)
 			let data = await services.getAllRoutines();
 			if (await data) {
 				let workouts = [];
@@ -49,9 +52,6 @@ export default function routineHistory({ changeView, navigation }) {
 				});
 				if (await workouts) {
 
-					console.log("==========");
-					console.log(workouts);
-					console.log("==========");
 					let workoutsSortedByDate = await workouts.sort(function (
 						a,
 						b
@@ -73,9 +73,21 @@ export default function routineHistory({ changeView, navigation }) {
 
 			let prevWorkout = await JSON.parse(await AsyncStorage.getItem('prevWorkout'));
 
-			if (await prevWorkout) {
-				setPrevWorkoutId(prev => prevWorkout.routineId)
-				setIsWorkoutEnded(false);
+			if (prevWorkout) {
+
+				let prevRoutineId = await prevWorkout?.routineId;
+				let allRoutines = await services.getAllRoutines();
+				let isTheRoutineStillAvailable = false;
+
+				Object.values(await allRoutines).forEach(r => {
+					if (prevRoutineId === r?.routineId) {
+						isTheRoutineStillAvailable = true;
+					}
+				})
+				if (await prevWorkout, isTheRoutineStillAvailable) {
+					setPrevWorkoutId(prev => prevWorkout?.routineId);
+					setIsWorkoutEnded(false);
+				}
 			}
 		} catch (err) {
 			console.log(err);
@@ -105,83 +117,109 @@ export default function routineHistory({ changeView, navigation }) {
 	return (
 		<>
 			<View style={styles.body}>
-				<FlatList
-					data={routines ? routines : null}
-					keyExtractor={(item) => item.workoutId}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							onPress={() =>
-								openRoutine({
-									wId: item.workoutId,
-									rId: item.routineId
-								})
-							}>
-							<View style={styles.item}>
-								<Text
-									style={{
-										color: "white",
-										fontSize: 19,
-										position: "absolute",
-										left: 15,
-										top: 20
-									}}>
-									{item.name}
-								</Text>
+				{routines?.length > 0 ?
+					<FlatList
+						data={routines ? routines : null}
+						keyExtractor={(item) => item.workoutId}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								onPress={() =>
+									openRoutine({
+										wId: item.workoutId,
+										rId: item.routineId
+									})
+								}>
+								<View style={styles.item}>
+									<Text
+										style={{
+											color: "white",
+											fontSize: 19,
+											position: "absolute",
+											left: 15,
+											top: 20
+										}}>
+										{item.name}
+									</Text>
 
-								<Fontisto
-									name="date"
-									size={20}
-									color="white"
-									style={{
-										right: "41%",
-										top: 22,
-										position: "absolute"
-									}}
-								/>
-								<Text
-									style={{
-										color: "white",
-										fontSize: 18,
-										position: "absolute",
-										right: 55,
-										top: 20
-									}}>
-									{item.date}
+									<Fontisto
+										name="date"
+										size={20}
+										color="white"
+										style={{
+											right: "41%",
+											top: 22,
+											position: "absolute"
+										}}
+									/>
+									<Text
+										style={{
+											color: "white",
+											fontSize: 18,
+											position: "absolute",
+											right: 55,
+											top: 20
+										}}>
+										{item.date}
+									</Text>
+									<TouchableOpacity
+										style={{
+											width: 40,
+											height: 67.2,
+											backgroundColor: "#EC4226",
+											right: 0,
+											margin: 0,
+											position: "absolute",
+											borderBottomRightRadius: 10,
+											borderTopRightRadius: 10,
+										}}
+										onPress={() =>
+											deleteWorkout(
+												item.routineId,
+												item.workoutId
+											)
+										}>
+										<View>
+											<AntDesign
+												name="delete"
+												size={24}
+												color="white"
+												style={{
+													top: 20,
+													right: 0,
+													left: 7
+												}}
+											/>
+										</View>
+									</TouchableOpacity>
+								</View>
+							</TouchableOpacity>
+						)}
+					/>
+					: <View style={{
+						position: "absolute", bottom: "90%", alignItems: 'center', justifyContent: 'center', alignContent: 'center', shadowColor: "#000",
+						shadowOffset: {
+							width: 0,
+							height: 10,
+						},
+						shadowOpacity: 0.53,
+						shadowRadius: 13.97,
+						elevation: 21,
+					}}>
+						{areRoutinesLoaded ?
+							<>
+								<Text style={{
+									color: "#FFCC1D",
+									fontFamily: "redCoat-Bold", fontSize: 40
+								}}>
+									No logs
 								</Text>
-								<TouchableOpacity
-									style={{
-										width: 40,
-										height: 67.2,
-										backgroundColor: "#EC4226",
-										right: 0,
-										margin: 0,
-										position: "absolute",
-										borderBottomRightRadius: 10,
-										borderTopRightRadius: 10,
-									}}
-									onPress={() =>
-										deleteWorkout(
-											item.routineId,
-											item.workoutId
-										)
-									}>
-									<View>
-										<AntDesign
-											name="delete"
-											size={24}
-											color="white"
-											style={{
-												top: 20,
-												right: 0,
-												left: 7
-											}}
-										/>
-									</View>
-								</TouchableOpacity>
-							</View>
-						</TouchableOpacity>
-					)}
-				/>
+								<Shadow distance={1} startColor="#696969" finalColor="#FFCC1D" size={[140, 1]} offset={[0, 1]} radius={10}>
+								</Shadow>
+							</>
+							: <View style={styles.loadingSpinner}>
+								<ActivityIndicator size="large" color="#ffff" />
+							</View>}
+					</View>}
 			</View>
 			<LinearGradient
 				colors={["#d5990c", "#ffff", "#ffff"]}

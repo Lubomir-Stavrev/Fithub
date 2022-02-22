@@ -7,8 +7,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function AddRouter({ changeView }) {
 	const [isExercise, setIsExercise] = useState(false);
 	const [exercise, setExercise] = useState(false);
+	const [sets, setSets] = useState();
+	const [exerciseName, setExerciseName] = useState();
 
 	useEffect(() => {
+
 		return async () => {
 			try {
 				await AsyncStorage.removeItem("routineInfo");
@@ -18,9 +21,14 @@ export default function AddRouter({ changeView }) {
 			}
 		};
 	}, []);
-	const handleChange = (props) => {
+	const handleChange = async (props) => {
+		if (await props) {
+			let data = { exerciseName: props.exerciseName, sets: props.sets };
+			console.log(await data);
+			setExercise(prev => data);
+
+		}
 		setIsExercise(props.state);
-		setExercise({ exerciseName: props.exerciseName, sets: props.sets });
 	};
 	return (
 		<>
