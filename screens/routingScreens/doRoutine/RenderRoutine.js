@@ -47,7 +47,7 @@ export default function renderRoutine({ routineId, changeView }) {
 
         return () => {
             setIsStopwatchStart((prev) => {
-                console.log('asd')
+
                 if (prev) {
                     try {
                         let lastNotes;
@@ -104,6 +104,7 @@ export default function renderRoutine({ routineId, changeView }) {
         async function getRoutineData() {
             if (routineId) {
                 let data = await services.getRoutine(routineId);
+                console.log(data);
 
                 let lastWorkout = await services.getLastWorkout(routineId);
 

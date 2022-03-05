@@ -46,16 +46,6 @@ export default Sidebar = (props) => {
 			<View style={styles.navContainer}>
 				<DrawerNavigatorItems {...props} />
 			</View>
-			<AdMobBanner
-				style={{
-					position: "absolute",
-					top: "39.5%",
-					left: "-7.5%"
-				}}
-				bannerSize="mediumRectangle"
-				adUnitID={bannerAdId}
-				servePersonaLizedAds={false}
-			/>
 			<View style={styles.bottomNav}>
 				<View style={styles.socialMedia}>
 

@@ -232,5 +232,36 @@ export default {
 			.catch((err) => {
 				throw new Error(err);
 			});
+	},
+	async sendCalendarData(markedDates, checkedDaysForCurrentWeek, checkedDaysForCurrentMonth, checkedDaysForAllTime, monthTarget,
+		weekTarget) {
+
+		let uid = JSON.parse(await AsyncStorage.getItem("auth")).uid
+		return fetch(db + `calendars/${uid}/.json`, {
+			method: "PUT",
+			body: JSON.stringify({
+				markedDates: { markedDates },
+				checkedDaysForCurrentWeek,
+				checkedDaysForCurrentMonth,
+				checkedDaysForAllTime,
+				monthTarget,
+				weekTarget,
+				uid: JSON.parse(await AsyncStorage.getItem("auth")).uid
+			})
+		}).then((res) => res.json());
+
+	},
+	async getUserCalendarData() {
+
+		let currUid = await JSON.parse(await AsyncStorage.getItem("auth")).uid;
+		return await fetch(db + `/calendars/${currUid}/.json`)
+			.then((res) => res.json())
+			.then((data) => {
+				return data
+			});
+
+
+
 	}
+
 };
