@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "~1.15.0",
+    "@react-native-community/datetimepicker": "^5.1.0",
     "@react-native-community/google-signin": "^5.0.0",
     "@react-native-firebase/app": "^13.0.1",
     "@react-native-google-signin/google-signin": "^7.1.0",
@@ -44,16 +45,20 @@
     "react-native-screens": "~3.8.0",
     "react-native-shadow-2": "^6.0.2",
     "react-native-stopwatch-timer": "^0.0.21",
+    "react-native-svg": "12.1.1",
     "react-native-uuid": "^2.0.1",
     "react-native-web": "0.17.1",
     "react-navigation-drawer": "^2.7.1",
-    "react-navigation-stack": "^2.10.4",
-    "react-native-svg": "12.1.1"
+    "react-navigation-stack": "^2.10.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.3",
     "prettier": "^2.5.1"
   },
   "private": true
