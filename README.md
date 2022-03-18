@@ -25,7 +25,7 @@ code to open the app from an actual phone or emulator. \
 
 ## Fast walk-through
 
-![]()
+![](https://github.com/Lubomir-Stavrev/Fithub/blob/main/fithub_gif.gif)
 
 
 
