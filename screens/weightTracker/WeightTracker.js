@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     Dimensions,
     KeyboardAvoidingView,
-    SafeAreaView
+    SafeAreaView,
+    ScrollView
 
 } from "react-native";
 
@@ -40,6 +41,7 @@ export default function WeightTracker({ navigation }) {
     const [currentWeight, setCurrentWeight] = useState(0);
     const [dates, setDates] = useState([]);
     const [loggedWeight, setLoggedWeight] = useState([]);
+    const windowWidth = Dimensions.get('window').width;
 
     const data = {
         labels: dates,
@@ -105,6 +107,11 @@ export default function WeightTracker({ navigation }) {
         setDates(prev => currentDates);
         setLoggedWeight(prev => currentLoggedWeights);
         manageMenu('close')
+    }
+
+    const widthFormula = () => {
+
+        return ((data.labels.length * windowWidth) / 5) <= windowWidth ? windowWidth : (data.labels.length * windowWidth) / 5
     }
     return (
         <View style={styles.container}>
@@ -189,40 +196,51 @@ export default function WeightTracker({ navigation }) {
                             </View>
                         </View>
                     </View>
-                    {loggedWeight.length > 0 ? <LineChart
-                        data={data}
-                        width={Dimensions.get("window").width - 12} // from react-native
-                        height={250}
-                        xAxisInterval={0.5} // optional, defaults to 1
-                        withVerticalLines={false}
-                        chartConfig={{
-                            backgroundGradientFrom: '#222222',
-                            backgroundGradientTo: '#181818',
-                            decimalPlaces: 2, // optional, defaults to 2dp
-                            color: (opacity = 0) => `rgba(255, 209, 24,1)`,
-                            strokeWidth: 1.8,
-                            labelColor: (opacity = 0) => `#EDEDED`,
-                            propsForDots: {
-                                r: "2",
-                                strokeWidth: "2",
-                                stroke: "#ffff"
-                            }, propsForBackgroundLines: {
-                                stroke: 'rgba(255,204,29,0.6)',
+                    {loggedWeight.length > 0 ?
+                        <ScrollView
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={true}
+                            contentOffset={{ x: 0, y: 0 }}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            style={{ flex: 1 }}
+                        >
+                            <LineChart
+                                data={data}
+                                width={widthFormula()} // from react-native
+                                height={250}
+                                xAxisInterval={0.5} // optional, defaults to 1
+                                withVerticalLines={false}
+                                xLabelsOffset={5}
+                                chartConfig={{
+                                    backgroundGradientFrom: '#222222',
+                                    backgroundGradientTo: '#181818',
+                                    decimalPlaces: 2, // optional, defaults to 2dp
+                                    color: (opacity = 0) => `rgba(255, 209, 24,1)`,
+                                    strokeWidth: 1.8,
+                                    labelColor: (opacity = 0) => `#EDEDED`,
+                                    propsForDots: {
+                                        r: "2",
+                                        strokeWidth: "2",
+                                        stroke: "#ffff"
+                                    }, propsForBackgroundLines: {
+                                        stroke: 'rgba(255,204,29,0.6)',
 
-                            },
-                            propsForLabels: {
-                                fontFamily: 'redcoat',
-                                fontSize: 14
-                            },
-                        }}
-                        bezier
-                        style={{
-                            marginVertical: 20,
-                            borderRadius: 10,
-                            alignSelf: 'center',
-                            marginTop: 55
-                        }}
-                    /> :
+                                    },
+                                    propsForLabels: {
+                                        fontFamily: 'redcoat',
+                                        fontSize: 14
+                                    },
+                                }}
+                                bezier
+                                style={{
+                                    marginVertical: 20,
+                                    borderRadius: 10,
+                                    alignSelf: 'center',
+                                    marginTop: 55,
+                                    flex: 1,
+                                }}
+                            />
+                        </ScrollView> :
                         <TouchableOpacity style={{
                             position: 'absolute',
                             alignSelf: 'center',
