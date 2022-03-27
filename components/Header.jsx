@@ -9,7 +9,7 @@ export default function Header({ navigation }) {
 	};
 	return (
 		<View style={styles.header}>
-			<TouchableOpacity style={{ zIndex: 1000, width: 100, height: 60, paddingBottom: 50 }} onPress={() => openMenu()}>
+			<TouchableOpacity onPress={() => openMenu()}>
 				<View style={styles.menuBar}>
 					<View style={styles.bar}></View>
 					<View style={styles.bar}></View>
@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
 		marginLeft: 20,
 		marginTop: 30,
 		zIndex: 100,
-		padding: 4
+		padding: 4,
+		paddingRight: 10
 	},
 	bar: {
 		width: 32,

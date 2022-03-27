@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View, Image, ImageBackground, ScrollView } from "react-native";
-
+import { StyleSheet, Text, View, Image, ImageBackground } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import DefaultImage from "../assets/welcomePage.jpg";
 const DEFAULT_IMAGE = Image.resolveAssetSource(DefaultImage).uri;
 const image = { uri: DEFAULT_IMAGE };

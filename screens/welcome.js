@@ -23,14 +23,44 @@ export default function Welcome({ navigation }) {
 
 		//ca-app-pub-7464607351320039/2455978652
 		//ca-app-pub-7464607351320039/3681430414
-		/* try {
+		try {
 			AdMobInterstitial.setAdUnitID(interstitialAdId);
 			await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
 			await AdMobInterstitial.showAdAsync();
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 5000)
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 10000)
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 15000)
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 20000)
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 25000)
+			setTimeout(async () => {
+				AdMobInterstitial.setAdUnitID(interstitialAdId);
+				await AdMobInterstitial.requestAdAsync({ servePersonaLizedAds: false });
+				await AdMobInterstitial.showAdAsync();
+			}, 30000)
 
 		} catch (e) {
 			console.log(e);
-		} */
+		}
 
 
 		setTimeout(async function () {
@@ -51,6 +81,11 @@ export default function Welcome({ navigation }) {
 				source={image}
 				style={styles.image}>
 				<View style={styles.loadingSpinner}>
+					<AdMobBanner
+						bannerSize="banner"
+						adUnitID={bannerAdId}
+						servePersonaLizedAds={false}
+					/>
 					<AdMobBanner
 						bannerSize="banner"
 						adUnitID={bannerAdId}

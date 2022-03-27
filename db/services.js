@@ -251,6 +251,31 @@ export default {
 		}).then((res) => res.json());
 
 	},
+	async sendWeightData(allLoggedWeightDates, allLoggedWeight, actual, change, total, weeklyChange, monthlyChange) {
+		let uid = JSON.parse(await AsyncStorage.getItem("auth")).uid
+		return fetch(db + `weight/${uid}/.json`, {
+			method: "PATCH",
+			body: JSON.stringify({
+				allLoggedWeightDates,
+				allLoggedWeight,
+				actual,
+				change,
+				total,
+				weeklyChange,
+				monthlyChange,
+				uid: JSON.parse(await AsyncStorage.getItem("auth")).uid
+			})
+		}).then((res) => res.json());
+	},
+	async getUserWeightData() {
+
+		let currUid = await JSON.parse(await AsyncStorage.getItem("auth")).uid;
+		return await fetch(db + `/weight/${currUid}/.json`)
+			.then((res) => res.json())
+			.then((data) => {
+				return data
+			});
+	},
 	async getUserCalendarData() {
 
 		let currUid = await JSON.parse(await AsyncStorage.getItem("auth")).uid;
@@ -259,9 +284,6 @@ export default {
 			.then((data) => {
 				return data
 			});
-
-
-
 	}
 
 };

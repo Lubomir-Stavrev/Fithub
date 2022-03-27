@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from "react";
 import {
     Text,
@@ -10,10 +11,9 @@ import {
     Dimensions,
     KeyboardAvoidingView,
     SafeAreaView,
-    ScrollView
 
 } from "react-native";
-
+import { ScrollView } from "react-native-gesture-handler";
 import {
     LineChart,
 } from "react-native-chart-kit";
@@ -25,6 +25,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from "moment";
+import services from "../../db/services";
 
 const DEFAULT_IMAGE = Image.resolveAssetSource(DefaultImage).uri;
 const image = { uri: DEFAULT_IMAGE };
@@ -37,11 +38,35 @@ export default function WeightTracker({ navigation }) {
     const [formatedDate, setFormatedDate] = useState(moment().format('D MMMM YYYY'));
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
-    const [isWeightAdded, setIsWeightAdded] = useState(false);
+    const [isWeightAdded, setIsWeightChanged] = useState(false);
     const [currentWeight, setCurrentWeight] = useState(0);
     const [dates, setDates] = useState([]);
     const [loggedWeight, setLoggedWeight] = useState([]);
+    const [allWeightData, setAllWeightData] = useState({
+        actual: 0, change: 0,
+        total: 0, weekly: 0, monthly: 0,
+        weeklyChange: 0, monthlyChange: 0
+    });
     const windowWidth = Dimensions.get('window').width;
+
+    useEffect(async () => {
+        let data = await services.getUserWeightData();
+        if (data) {
+
+            setAllWeightData(prev => {
+                prev.actual = data?.actual
+                prev.change = data?.change
+                prev.total = data?.total
+                prev.weeklyChange = data?.weeklyChange
+                prev.monthlyChange = data?.monthlyChange
+                return prev;
+            })
+            setLoggedWeight(prev => data?.allLoggedWeight);
+            setDates(prev => data?.allLoggedWeightDates);
+            setCurrentWeight(prev => data?.allLoggedWeight[data?.allLoggedWeight.length - 1]);
+        }
+    }, [])
+
 
     const data = {
         labels: dates,
@@ -97,6 +122,33 @@ export default function WeightTracker({ navigation }) {
         showMode('date');
     };
 
+    const findIndexWeight = (props) => {
+        let currentDates = dates;
+        let startDateDay = Number(moment().startOf(props[0]).format('DD'));
+        let startDateMonth = Number(moment().startOf(props[0]).format('MM'));
+        let endDateDay = Number(moment().endOf(props[0]).format('DD'));
+        let endDateMonth = Number(moment().endOf(props[0]).format('MM'));
+        let firstWeightIndex = currentDates.findIndex(d => {
+            console.log(d);
+            console.log("Start date: ", startDateMonth);
+            console.log("End date: ", endDateMonth);
+            console.log("131");
+            let propToSearchDay = Number(d.split("-")[0]);
+            let propToSearchMonth = Number(d.split("-")[1]);
+
+            if ((startDateDay < propToSearchDay && endDateDay + 1 >= propToSearchDay) || propToSearchMonth < endDateMonth) {
+                console.log("Found prop: ")
+                return true;
+            }
+        });
+        console.log('------')
+        console.log(firstWeightIndex);
+        console.log("Type: " + props);
+        console.log('------')
+
+        return firstWeightIndex;
+    }
+
     const onSubmitWeight = () => {
 
         let otherFormat = moment(formatedDate, 'DMMMMYY').format('DD-MM');
@@ -107,11 +159,27 @@ export default function WeightTracker({ navigation }) {
         setDates(prev => currentDates);
         setLoggedWeight(prev => currentLoggedWeights);
         manageMenu('close')
+        let firstWeightOfTheWeek = loggedWeight[findIndexWeight(['week', 0])];
+        let firstWeightOfTheMonth = loggedWeight[findIndexWeight(['month', 1])];
+
+        setAllWeightData(prev => {
+            prev.actual = currentWeight;
+            prev.change = Number(currentWeight) - Number(currentLoggedWeights[currentLoggedWeights?.length - 2]);
+            prev.total = Number(currentWeight) - Number(currentLoggedWeights[0]);
+            prev.weeklyChange = Number(currentWeight) - Number(firstWeightOfTheWeek);
+            prev.monthlyChange = Number(currentWeight) - Number(firstWeightOfTheMonth);
+
+            services.sendWeightData(currentDates, currentLoggedWeights, prev.actual, prev.change, prev.total, prev.weeklyChange, prev.monthlyChange).
+                then(res => console.log("data send succesfully"));
+            return prev;
+        })
     }
 
     const widthFormula = () => {
 
-        return ((data.labels.length * windowWidth) / 5) <= windowWidth ? windowWidth : (data.labels.length * windowWidth) / 5
+        return ((data.labels.length * windowWidth) / 5) <= windowWidth ?
+            windowWidth :
+            (data.labels.length * windowWidth) / 5;
     }
     return (
         <View style={styles.container}>
@@ -149,7 +217,7 @@ export default function WeightTracker({ navigation }) {
 
                             <View style={{ ...styling.container, marginLeft: 0, paddingRight: 35 }}>
                                 <Text style={styling.textStyleTop}>Actual</Text>
-                                <Text style={styling.textStyle}>{0}kg</Text>
+                                <Text style={styling.textStyle}>{allWeightData?.actual}kg</Text>
                             </View>
                             <View style={{
                                 ...styling.container,
@@ -159,7 +227,7 @@ export default function WeightTracker({ navigation }) {
                                 paddingRight: 22,
                             }}>
                                 <Text style={styling.textStyleTop}>Change</Text>
-                                <Text style={styling.textStyle}>{0}kg</Text>
+                                <Text style={styling.textStyle}>{allWeightData?.change ? allWeightData?.change : 0}kg</Text>
                             </View>
                             <View style={{
                                 ...styling.container,
@@ -169,7 +237,7 @@ export default function WeightTracker({ navigation }) {
                                 paddingRight: 30,
                             }}>
                                 <Text style={styling.textStyleTop}>Total</Text>
-                                <Text style={styling.textStyle}>{0}kg</Text>
+                                <Text style={styling.textStyle}>{allWeightData?.total ? allWeightData?.total : 0}kg</Text>
                             </View>
                         </View>
                         <View style={{ borderBottomWidth: 0.3, borderColor: '#ffff', paddingTop: 14, width: '90%', alignSelf: 'center' }}></View>
@@ -182,7 +250,7 @@ export default function WeightTracker({ navigation }) {
                         }}>
                             <View style={{ ...styling.container, paddingRight: 25 }}>
                                 <Text style={styling.textStyleTop}>This week</Text>
-                                <Text style={styling.textStyle}>{0}kg</Text>
+                                <Text style={styling.textStyle}>{allWeightData?.weeklyChange ? allWeightData?.weeklyChange : 0}kg</Text>
                             </View>
 
                             <View style={{
@@ -192,7 +260,7 @@ export default function WeightTracker({ navigation }) {
                                 paddingLeft: 20
                             }}>
                                 <Text style={styling.textStyleTop}>This month</Text>
-                                <Text style={styling.textStyle}>{0}kg</Text>
+                                <Text style={styling.textStyle}>{allWeightData?.monthlyChange ? allWeightData?.monthlyChange : 0}kg</Text>
                             </View>
                         </View>
                     </View>
@@ -205,12 +273,37 @@ export default function WeightTracker({ navigation }) {
                             style={{ flex: 1 }}
                         >
                             <LineChart
+                                onDataPointClick={(index) => {
+                                    if (index.index) {
+                                        let currentLoggedWeight = loggedWeight;
+                                        currentLoggedWeight.splice(index.index, 1);
+                                        setLoggedWeight(prev => currentLoggedWeight);
+                                        let firstWeightOfTheWeek = loggedWeight[findIndexWeight(['week', 0])];
+                                        let firstWeightOfTheMonth = loggedWeight[findIndexWeight(['month', 1])];
+                                        let currentDates = dates;
+                                        currentDates.splice(index.index, 1);
+                                        setDates(prev => currentDates);
+                                        setIsWeightChanged(prev => prev === true ? false : true);
+                                        setAllWeightData(prev => {
+                                            prev.actual = Number(currentLoggedWeight[currentLoggedWeight?.length - 1]);
+                                            prev.change = Number(currentLoggedWeight[currentLoggedWeight?.length - 1]) - Number(currentLoggedWeight[currentLoggedWeight?.length - 2]);
+                                            prev.total = Number(currentLoggedWeight[currentLoggedWeight?.length - 1]) - Number(currentLoggedWeight[0]);
+                                            prev.weeklyChange = Number(currentWeight) - Number(firstWeightOfTheWeek);
+                                            prev.monthlyChange = Number(currentWeight) - Number(firstWeightOfTheMonth);
+                                            services.sendWeightData(currentDates, loggedWeight, prev.actual, prev.change, prev.total, prev.weeklyChange, prev.monthlyChange).
+                                                then(res => console.log("data sent successfully"));
+                                            return prev;
+                                        })
+
+                                    }
+                                }}
                                 data={data}
                                 width={widthFormula()} // from react-native
                                 height={250}
                                 xAxisInterval={0.5} // optional, defaults to 1
                                 withVerticalLines={false}
                                 xLabelsOffset={5}
+
                                 chartConfig={{
                                     backgroundGradientFrom: '#222222',
                                     backgroundGradientTo: '#181818',
